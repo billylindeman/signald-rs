@@ -1,17 +1,17 @@
-pub mod types;
 pub mod actions;
-pub mod socket;
 pub mod errors;
+pub mod socket;
+pub mod types;
 
 #[cfg(feature = "async-std")]
 pub mod async_std_socket;
 #[cfg(feature = "async-std")]
-pub use crate::async_std_socket::{SocketError, Signald};
+pub use crate::async_std_socket::{Signald, SocketError};
 
 #[cfg(feature = "tokio")]
 pub mod tokio_socket;
 #[cfg(feature = "tokio")]
-pub use crate::tokio_socket::{SocketError, Signald};
+pub use crate::tokio_socket::{Signald, SocketError};
 #[cfg(feature = "tokio")]
 use tokio::test;
 
@@ -31,19 +31,22 @@ mod tests {
         register().await
     }
 
-    async fn register() -> Result<(), SocketError>  {
+    async fn register() -> Result<(), SocketError> {
         use super::types::RegisterRequestV1;
         use super::Signald;
 
-        let mut socket = Signald::connect("run/signald.sock", |_| {}).await?;
+        let mut socket = Signald::connect("/tmp/signald.sock", |_| {}).await?;
 
         let mut register = RegisterRequestV1::default();
         register.account = Some("+15551234567".to_owned());
 
-        let response = socket.register(register).await;
+        let response = socket.register(register, None).await;
 
         match response {
-            Ok(response) => assert_eq!(response.address.unwrap().number.unwrap().as_str(), "+15551234567"),
+            Ok(response) => assert_eq!(
+                response.address.unwrap().number.unwrap().as_str(),
+                "+15551234567"
+            ),
             Err(e) => {
                 if let SocketError::Signald(e) = e {
                     assert_eq!(e.error_type.as_str(), "CaptchaRequired");

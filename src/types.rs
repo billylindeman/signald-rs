@@ -3,10 +3,10 @@ use std::collections::HashMap;
 use crate::errors::SignaldError;
 
 /// Accept a v2 group invitation. Note that you must have a profile name set to join groups.
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct AcceptInvitationRequestV1 {
     /// The account to interact with
-    /// Example: "+12024561414"
+    /// Example: "0cc10e61-d64c-4dbc-b51c-334f7dd45a4a"
     #[serde(skip_serializing_if = "Option::is_none")]
     pub account: Option<String>,
     /// Example: "EdSqI90cS0UomDpgUXOlCoObWvQOXlH5G3Z2d3f4ayE="
@@ -16,7 +16,7 @@ pub struct AcceptInvitationRequestV1 {
 }
 
 /// A local account in signald
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct AccountV1 {
     /// The primary identifier on the account, included with all requests to signald for this account. Previously called 'username'
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -30,27 +30,29 @@ pub struct AccountV1 {
     /// indicates the account has not completed registration
     #[serde(skip_serializing_if = "Option::is_none")]
     pub pending: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub pni: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct AccountAlreadyVerifiedErrorV1 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub message: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct AccountHasNoKeysErrorV1 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub message: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct AccountListV1 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub accounts: Option<Vec<AccountV1>>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct AccountLockedErrorV1 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub message: Option<String>,
@@ -59,32 +61,52 @@ pub struct AccountLockedErrorV1 {
 }
 
 /// Link a new device to a local Signal account
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct AddLinkedDeviceRequestV1 {
     /// The account to interact with
-    /// Example: "+12024561414"
+    /// Example: "0cc10e61-d64c-4dbc-b51c-334f7dd45a4a"
     #[serde(skip_serializing_if = "Option::is_none")]
     pub account: Option<String>,
-    /// the tsdevice:/ uri provided (typically in qr code form) by the new device
-    /// Example: "tsdevice:/?uuid=jAaZ5lxLfh7zVw5WELd6-Q&pub_key=BfFbjSwmAgpVJBXUdfmSgf61eX3a%2Bq9AoxAVpl1HUap9"
+    /// the sgnl://linkdevice uri provided (typically in qr code form) by the new device
+    /// Example: "sgnl://linkdevice?uuid=jAaZ5lxLfh7zVw5WELd6-Q&pub_key=BfFbjSwmAgpVJBXUdfmSgf61eX3a%2Bq9AoxAVpl1HUap9"
     #[serde(skip_serializing_if = "Option::is_none")]
     pub uri: Option<String>,
 }
 
 /// add a new server to connect to. Returns the new server's UUID.
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct AddServerRequestV1 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub server: Option<ServerV1>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct AllIdentityKeyListV1 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub identity_keys: Option<Vec<IdentityKeyListV1>>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
+pub struct AnswerCallRequestV1 {
+    /// the local account to use
+    /// Example: "0cc10e61-d64c-4dbc-b51c-334f7dd45a4a"
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub account: Option<String>,
+    /// the id of the call
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub call_id: Option<i64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub destination_device_id: Option<i32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub multiring: Option<bool>,
+    /// the address of the caller
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub recipient: Option<JsonAddressV1>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub sdp: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct AnswerMessageV1 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub id: Option<i64>,
@@ -95,10 +117,10 @@ pub struct AnswerMessageV1 {
 }
 
 /// approve a request to join a group
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct ApproveMembershipRequestV1 {
     /// The account to interact with
-    /// Example: "+12024561414"
+    /// Example: "0cc10e61-d64c-4dbc-b51c-334f7dd45a4a"
     #[serde(skip_serializing_if = "Option::is_none")]
     pub account: Option<String>,
     /// Example: "EdSqI90cS0UomDpgUXOlCoObWvQOXlH5G3Z2d3f4ayE="
@@ -110,13 +132,60 @@ pub struct ApproveMembershipRequestV1 {
     pub members: Option<Vec<JsonAddressV1>>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
+pub struct AttachmentTooLargeErrorV1 {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub filename: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub message: Option<String>,
+}
+
+/// Indicates the server rejected our credentials or a failed group update. Typically means the linked device was removed by the primary device, or that the account was re-registered. For group updates, this can indicate that we lack permissions.
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
+pub struct AuthorizationFailedErrorV1 {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub message: Option<String>,
+}
+
+/// Bans users from a group. This works even if the users aren't in the group. If they are currently in the group, they will also be removed.
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
+pub struct BanUserRequestV1 {
+    /// The account to interact with
+    /// Example: "0cc10e61-d64c-4dbc-b51c-334f7dd45a4a"
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub account: Option<String>,
+    /// Example: "EdSqI90cS0UomDpgUXOlCoObWvQOXlH5G3Z2d3f4ayE="
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub group_id: Option<String>,
+    /// List of users to ban
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub users: Option<Vec<JsonAddressV1>>,
+}
+
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
+pub struct BannedGroupMemberV1 {
+    /// Timestamp as milliseconds since Unix epoch of when the user was banned. This field is set by the server.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub timestamp: Option<i64>,
+    /// Example: "aeed01f0-a234-478e-8cf7-261c283151e7"
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub uuid: Option<String>,
+}
+
+/// A message containing a single boolean, usually as a response
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
+pub struct BooleanMessageV1 {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub value: Option<bool>,
+}
+
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct BusyMessageV1 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub id: Option<i64>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct CallMessageV1 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub answer_message: Option<AnswerMessageV1>,
@@ -134,19 +203,28 @@ pub struct CallMessageV1 {
     pub offer_message: Option<OfferMessageV1>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct CapabilitiesV1 {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub announcement_group: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub change_number: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(rename = "gv1-migration")]
     pub gv_1_migration: Option<bool>,
+    /// this capability is deprecated and will always be true
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(rename = "gv2")]
     pub gv_2: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub sender_key: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub storage: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub stories: Option<bool>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct CaptchaRequiredErrorV1 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub message: Option<String>,
@@ -154,9 +232,12 @@ pub struct CaptchaRequiredErrorV1 {
     pub more: Option<String>,
 }
 
-/// Wraps all incoming messages after a v1 subscribe request is issued
-#[derive(Serialize, Deserialize, Clone, Default)]
+/// Wraps all incoming messages sent to the client after a v1 subscribe request is issued
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct ClientMessageWrapperV1 {
+    /// the account this message is from
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub account: Option<String>,
     /// the incoming object. The structure will vary from message to message, see `type` and `version` fields
     #[serde(skip_serializing_if = "Option::is_none")]
     pub data: Option<HashMap<String, String>>,
@@ -172,10 +253,10 @@ pub struct ClientMessageWrapperV1 {
     pub version: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct CreateGroupRequestV1 {
     /// The account to interact with
-    /// Example: "+12024561414"
+    /// Example: "0cc10e61-d64c-4dbc-b51c-334f7dd45a4a"
     #[serde(skip_serializing_if = "Option::is_none")]
     pub account: Option<String>,
     /// Example: "/tmp/image.jpg"
@@ -196,10 +277,10 @@ pub struct CreateGroupRequestV1 {
 }
 
 /// delete all account data signald has on disk, and optionally delete the account from the server as well. Note that this is not "unlink" and will delete the entire account, even from a linked device.
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct DeleteAccountRequestV1 {
     /// The account to delete
-    /// Example: "+12024561414"
+    /// Example: "0cc10e61-d64c-4dbc-b51c-334f7dd45a4a"
     #[serde(skip_serializing_if = "Option::is_none")]
     pub account: Option<String>,
     /// delete account information from the server as well (default false)
@@ -207,7 +288,7 @@ pub struct DeleteAccountRequestV1 {
     pub server: Option<bool>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct DeviceInfoV1 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub created: Option<i64>,
@@ -220,23 +301,34 @@ pub struct DeviceInfoV1 {
     pub name: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
+pub struct DuplicateMessageErrorV1 {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub message: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub timestamp: Option<i64>,
+}
+
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct FingerprintVersionMismatchErrorV1 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub message: Option<String>,
 }
 
-/// After a linking URI has been requested, finish_link must be called with the session_id provided with the URI. it will return information about the new account once the linking process is completed by the other device.
-#[derive(Serialize, Deserialize, Clone, Default)]
+/// After a linking URI has been requested, finish_link must be called with the session_id provided with the URI. it will return information about the new account once the linking process is completed by the other device and the new account is setup. Note that the account setup process can sometimes take some time, if rapid userfeedback is required after scanning, use wait_for_scan first, then finish setup with finish_link.
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct FinishLinkRequestV1 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub device_name: Option<String>,
+    /// overwrite existing account data if the phone number conflicts. false by default
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub overwrite: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub session_id: Option<String>,
 }
 
 /// Generate a linking URI. Typically this is QR encoded and scanned by the primary device. Submit the returned session_id with a finish_link request.
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct GenerateLinkingURIRequestV1 {
     /// The identifier of the server to use. Leave blank for default (usually Signal production servers but configurable at build time)
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -244,7 +336,7 @@ pub struct GenerateLinkingURIRequestV1 {
 }
 
 /// get all known identity keys
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct GetAllIdentitiesV1 {
     /// The account to interact with
     /// Example: "+12024561414"
@@ -252,11 +344,11 @@ pub struct GetAllIdentitiesV1 {
     pub account: Option<String>,
 }
 
-/// Query the server for the latest state of a known group. If no account in signald is a member of the group (anymore), an error with error_type: 'UnknownGroupError' is returned.
-#[derive(Serialize, Deserialize, Clone, Default)]
+/// Query the server for the latest state of a known group. If the account is not a member of the group, an UnknownGroupError is returned.
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct GetGroupRequestV1 {
     /// The account to interact with
-    /// Example: "+12024561414"
+    /// Example: "0cc10e61-d64c-4dbc-b51c-334f7dd45a4a"
     #[serde(skip_serializing_if = "Option::is_none")]
     pub account: Option<String>,
     /// Example: "EdSqI90cS0UomDpgUXOlCoObWvQOXlH5G3Z2d3f4ayE="
@@ -268,11 +360,29 @@ pub struct GetGroupRequestV1 {
     pub revision: Option<i32>,
 }
 
+/// Query the server for group revision history. The history contains information about the changes between each revision and the user that made the change.
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
+pub struct GetGroupRevisionPagesRequestV1 {
+    /// The account to interact with
+    /// Example: "0cc10e61-d64c-4dbc-b51c-334f7dd45a4a"
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub account: Option<String>,
+    /// The revision to start the pages from. Note that if this is lower than the revision you joined the group, an AuthorizationFailedError is returned.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub from_revision: Option<i32>,
+    /// Example: "EdSqI90cS0UomDpgUXOlCoObWvQOXlH5G3Z2d3f4ayE="
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub group_id: Option<String>,
+    /// Whether to include the first state in the returned pages (default false)
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub include_first_revision: Option<bool>,
+}
+
 /// Get information about a known keys for a particular address
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct GetIdentitiesRequestV1 {
     /// The account to interact with
-    /// Example: "+12024561414"
+    /// Example: "0cc10e61-d64c-4dbc-b51c-334f7dd45a4a"
     #[serde(skip_serializing_if = "Option::is_none")]
     pub account: Option<String>,
     /// address to get keys for
@@ -281,18 +391,19 @@ pub struct GetIdentitiesRequestV1 {
 }
 
 /// list all linked devices on a Signal account
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct GetLinkedDevicesRequestV1 {
     /// The account to interact with
-    /// Example: "+12024561414"
+    /// Example: "0cc10e61-d64c-4dbc-b51c-334f7dd45a4a"
     #[serde(skip_serializing_if = "Option::is_none")]
     pub account: Option<String>,
 }
 
 /// Get all information available about a user
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct GetProfileRequestV1 {
     /// the signald account to use
+    /// Example: "0cc10e61-d64c-4dbc-b51c-334f7dd45a4a"
     #[serde(skip_serializing_if = "Option::is_none")]
     pub account: Option<String>,
     /// the address to look up
@@ -304,11 +415,19 @@ pub struct GetProfileRequestV1 {
     pub async_: Option<bool>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct GetServersRequestV1;
 
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
+pub struct GradientV1 {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub end_color: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub start_color: Option<String>,
+}
+
 /// group access control settings. Options for each controlled action are: UNKNOWN, ANY, MEMBER, ADMINISTRATOR, UNSATISFIABLE and UNRECOGNIZED
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct GroupAccessControlV1 {
     /// who can edit group info
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -322,8 +441,85 @@ pub struct GroupAccessControlV1 {
     pub members: Option<String>,
 }
 
+/// Represents a group change made by a user. This can also represent request link invites. Only the fields relevant to the group change performed will be set. Note that in signald, group changes are currently only received from incoming messages from a message subscription.
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
+pub struct GroupChangeV1 {
+    /// Represents users that have been removed from the group. This can be from admins removing users, or users choosing to leave the group
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub delete_members: Option<Vec<JsonAddressV1>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub delete_pending_members: Option<Vec<JsonAddressV1>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub delete_requesting_members: Option<Vec<JsonAddressV1>>,
+    /// The user that made the change.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub editor: Option<JsonAddressV1>,
+    /// Represents users that have rotated their profile key. Note that signald currently does not expose profile keys to clients. The joined revision property will always be 0 in this list.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub modified_profile_keys: Option<Vec<GroupMemberV1>>,
+    /// Represents users with their new, modified role.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub modify_member_roles: Option<Vec<GroupMemberV1>>,
+    /// If not null, then this group change modified one of the access controls. Some of the properties in here will be null.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub new_access_control: Option<GroupAccessControlV1>,
+    /// Whether this group change changed the avatar.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub new_avatar: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub new_banned_members: Option<Vec<BannedGroupMemberV1>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub new_description: Option<String>,
+    /// Whether this group change involved resetting the group invite link.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub new_invite_link_password: Option<bool>,
+    /// Whether this change affected the announcement group setting. Possible values are UNKNOWN, ENABLED or DISABLED
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub new_is_announcement_group: Option<String>,
+    /// Represents users have been added to the group. This can be from group members adding users, or a users joining via a group link that required no approval.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub new_members: Option<Vec<GroupMemberV1>>,
+    /// Represents a user that has been invited to the group by another user.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub new_pending_members: Option<Vec<GroupPendingMemberV1>>,
+    /// Represents users that have requested to join the group via the group link. Note that members requesting to join might not necessarily have the list of users in the group, so they won't be able to send a peer-to-peer group update message to inform users of their request to join. Other users in the group may inform us that the revision has increased, but the members requesting access will have to be obtained from the server instead (which signald will handle). For now, a get_group request has to be made to get the users that have requested to join the group.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub new_requesting_members: Option<Vec<GroupRequestingMemberV1>>,
+    /// New disappearing messages timer value.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub new_timer: Option<i32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub new_title: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub new_unbanned_members: Option<Vec<BannedGroupMemberV1>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub promote_pending_members: Option<Vec<GroupMemberV1>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub promote_requesting_members: Option<Vec<GroupMemberV1>>,
+    /// The group revision that this change brings the group to.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub revision: Option<i32>,
+}
+
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
+pub struct GroupHistoryEntryV1 {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub change: Option<GroupChangeV1>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub group: Option<JsonGroupV2InfoV1>,
+}
+
+/// The result of fetching a group's history along with paging data.
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
+pub struct GroupHistoryPageV1 {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub paging_data: Option<PagingDataV1>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub results: Option<Vec<GroupHistoryEntryV1>>,
+}
+
 /// A generic type that is used when the group version is not known
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct GroupInfoV1 {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(rename = "v1")]
@@ -334,10 +530,10 @@ pub struct GroupInfoV1 {
 }
 
 /// Get information about a group from a signal.group link
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct GroupLinkInfoRequestV1 {
     /// The account to use
-    /// Example: "+12024561414"
+    /// Example: "0cc10e61-d64c-4dbc-b51c-334f7dd45a4a"
     #[serde(skip_serializing_if = "Option::is_none")]
     pub account: Option<String>,
     /// the signald.group link
@@ -346,22 +542,23 @@ pub struct GroupLinkInfoRequestV1 {
     pub uri: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct GroupLinkNotActiveErrorV1 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub message: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct GroupListV1 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub groups: Option<Vec<JsonGroupV2InfoV1>>,
+    /// list of legacy (v1) groups, no longer supported (will always be empty)
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(rename = "legacyGroups")]
     pub legacy_groups: Option<Vec<JsonGroupInfoV1>>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct GroupMemberV1 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub joined_revision: Option<i32>,
@@ -374,19 +571,75 @@ pub struct GroupMemberV1 {
     pub uuid: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct GroupNotActiveErrorV1 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub message: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+/// Indicates the server rejected our group update. This can be due to errors such as trying to add a user that's already in the group.
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
+pub struct GroupPatchNotAcceptedErrorV1 {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub message: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
+pub struct GroupPendingMemberV1 {
+    /// Example: "aeed01f0-a234-478e-8cf7-261c283151e7"
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub added_by_uuid: Option<String>,
+    /// possible values are: UNKNOWN, DEFAULT, ADMINISTRATOR and UNRECOGNIZED
+    /// Example: "DEFAULT"
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub role: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub timestamp: Option<i64>,
+    /// Example: "aeed01f0-a234-478e-8cf7-261c283151e7"
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub uuid: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
+pub struct GroupRequestingMemberV1 {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub timestamp: Option<i64>,
+    /// Example: "aeed01f0-a234-478e-8cf7-261c283151e7"
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub uuid: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct GroupVerificationErrorV1 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub message: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
+pub struct HangupCallRequestV1 {
+    /// the local account to use
+    /// Example: "0cc10e61-d64c-4dbc-b51c-334f7dd45a4a"
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub account: Option<String>,
+    /// the id of the call
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub call_id: Option<i64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub destination_device_id: Option<i32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub device_id: Option<i32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub multiring: Option<bool>,
+    /// the address of the caller
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub recipient: Option<JsonAddressV1>,
+    /// hangup type, options are: normal, accepted, declined, busy, need_permission
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(rename = "type")]
+    pub type_: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct HangupMessageV1 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub device_id: Option<i32>,
@@ -399,17 +652,22 @@ pub struct HangupMessageV1 {
     pub type_: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct IceUpdateMessageV1 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub id: Option<i64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub line: Option<i32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub mid: Option<String>,
+    /// the base64 encoded protobuf value.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub opaque: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub sdp: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct IdentityKeyV1 {
     /// the first time this identity key was seen
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -426,7 +684,7 @@ pub struct IdentityKeyV1 {
 }
 
 /// a list of identity keys associated with a particular address
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct IdentityKeyListV1 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub address: Option<JsonAddressV1>,
@@ -434,7 +692,7 @@ pub struct IdentityKeyListV1 {
     pub identities: Option<Vec<IdentityKeyV1>>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct IncomingMessageV1 {
     /// Example: "+12024561414"
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -462,6 +720,8 @@ pub struct IncomingMessageV1 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub source_device: Option<i32>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub story_message: Option<StoryMessageV1>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub sync_message: Option<JsonSyncMessageV1>,
     /// Example: 1615576442475
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -475,8 +735,8 @@ pub struct IncomingMessageV1 {
     pub unidentified_sender: Option<bool>,
 }
 
-/// an internal error in signald has occured.
-#[derive(Serialize, Deserialize, Clone, Default)]
+/// an internal error in signald has occurred. typically these are things that "should never happen" such as issues saving to the local disk, but it is also the default error type and may catch some things that should have their own error type. If you find tht your code is depending on the exception list for any particular behavior, please file an issue so we can pull those errors out to a separate error type: https://gitlab.com/signald/signald/-/issues/new
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct InternalErrorV1 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub exceptions: Option<Vec<String>>,
@@ -484,7 +744,7 @@ pub struct InternalErrorV1 {
     pub message: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct InvalidAttachmentErrorV1 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub filename: Option<String>,
@@ -492,59 +752,72 @@ pub struct InvalidAttachmentErrorV1 {
     pub message: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct InvalidBase64ErrorV1 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub message: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct InvalidFingerprintErrorV1 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub message: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct InvalidGroupErrorV1 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub message: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct InvalidGroupStateErrorV1 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub message: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct InvalidInviteURIErrorV1 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub message: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct InvalidProxyErrorV1 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub message: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct InvalidRecipientErrorV1 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub message: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct InvalidRequestErrorV1 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub message: Option<String>,
 }
 
+/// Determine whether an account identifier is registered on the Signal service.
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
+pub struct IsIdentifierRegisteredRequestV1 {
+    /// The account to use to use
+    /// Example: "0cc10e61-d64c-4dbc-b51c-334f7dd45a4a"
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub account: Option<String>,
+    /// The UUID of an identifier to check if it is registered on Signal. This UUID is either a Phone Number Identity (PNI) or an Account Identity (ACI).
+    /// Example: "aeed01f0-a234-478e-8cf7-261c283151e7"
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub identifier: Option<String>,
+}
+
 /// Join a group using the a signal.group URL. Note that you must have a profile name set to join groups.
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct JoinGroupRequestV1 {
     /// The account to interact with
-    /// Example: "+12024561414"
+    /// Example: "0cc10e61-d64c-4dbc-b51c-334f7dd45a4a"
     #[serde(skip_serializing_if = "Option::is_none")]
     pub account: Option<String>,
     /// The signal.group URL
@@ -553,7 +826,7 @@ pub struct JoinGroupRequestV1 {
     pub uri: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct JsonAddressV1 {
     /// An e164 phone number, starting with +. Currently the only available user-facing Signal identifier.
     /// Example: "+13215551234"
@@ -566,8 +839,8 @@ pub struct JsonAddressV1 {
     pub uuid: Option<String>,
 }
 
-/// represents a file attached to a message. When seding, only `filename` is required.
-#[derive(Serialize, Deserialize, Clone, Default)]
+/// represents a file attached to a message. When sending, only `filename` is required.
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct JsonAttachmentV1 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub blurhash: Option<String>,
@@ -604,7 +877,7 @@ pub struct JsonAttachmentV1 {
     pub width: Option<i32>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct JsonBlockedListMessageV1 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub addresses: Option<Vec<JsonAddressV1>>,
@@ -613,7 +886,7 @@ pub struct JsonBlockedListMessageV1 {
     pub group_ids: Option<Vec<String>>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct JsonDataMessageV1 {
     /// files attached to the incoming message
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -624,7 +897,7 @@ pub struct JsonDataMessageV1 {
     pub body: Option<String>,
     /// if the incoming message has a shared contact, the contact's information will be here
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub contacts: Option<Vec<SharedContactV0>>,
+    pub contacts: Option<Vec<SharedContactV1>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(rename = "endSession")]
     pub end_session: Option<bool>,
@@ -642,6 +915,9 @@ pub struct JsonDataMessageV1 {
     /// the eraId string from a group call message update
     #[serde(skip_serializing_if = "Option::is_none")]
     pub group_call_update: Option<String>,
+    /// whether or not this message changes the expiresInSeconds value for the whole chat. Some messages (remote deletes, reactions, etc) will have expiresInSeconds=0 even though the chat has disappearing messages enabled.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub is_expiration_update: Option<bool>,
     /// list of mentions in the message
     #[serde(skip_serializing_if = "Option::is_none")]
     pub mentions: Option<Vec<JsonMentionV1>>,
@@ -667,6 +943,8 @@ pub struct JsonDataMessageV1 {
     /// if the incoming message is a sticker, information about the sicker will be here
     #[serde(skip_serializing_if = "Option::is_none")]
     pub sticker: Option<JsonStickerV0>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub story_context: Option<StoryContextV1>,
     /// the timestamp that the message was sent at, according to the sender's device. This is used to uniquely identify this message for things like reactions and quotes.
     /// Example: 1615576442475
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -678,7 +956,7 @@ pub struct JsonDataMessageV1 {
 }
 
 /// information about a legacy group
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct JsonGroupInfoV1 {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(rename = "avatarId")]
@@ -695,7 +973,7 @@ pub struct JsonGroupInfoV1 {
     pub type_: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct JsonGroupJoinInfoV1 {
     /// The access level required in order to join the group from the invite link, as an AccessControl.AccessRequired enum from the upstream Signal groups.proto file. This is UNSATISFIABLE (4) when the group link is disabled; ADMINISTRATOR (3) when the group link is enabled, but an administrator must approve new members; and ANY (1) when the group link is enabled and no approval is required. See theGroupAccessControl structure and the upstream enum ordinals.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -726,7 +1004,7 @@ pub struct JsonGroupJoinInfoV1 {
 }
 
 /// Information about a Signal group
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct JsonGroupV2InfoV1 {
     /// current access control settings for this group
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -740,7 +1018,12 @@ pub struct JsonGroupV2InfoV1 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub avatar: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub banned_members: Option<Vec<BannedGroupMemberV1>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
+    /// Represents a peer-to-peer group change done by a user. Will not be set if the group change signature fails verification. This is usually only set inside of incoming messages.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub group_change: Option<GroupChangeV1>,
     /// Example: "EdSqI90cS0UomDpgUXOlCoObWvQOXlH5G3Z2d3f4ayE="
     #[serde(skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
@@ -761,6 +1044,9 @@ pub struct JsonGroupV2InfoV1 {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(rename = "pendingMembers")]
     pub pending_members: Option<Vec<JsonAddressV1>>,
+    /// will be set to true for incoming messages to indicate the user has been removed from the group
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub removed: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(rename = "requestingMembers")]
     pub requesting_members: Option<Vec<JsonAddressV1>>,
@@ -775,7 +1061,7 @@ pub struct JsonGroupV2InfoV1 {
     pub title: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct JsonMentionV1 {
     /// The length of the mention represented in the message. Seems to always be 1 but included here in case that changes.
     /// Example: 1
@@ -791,75 +1077,22 @@ pub struct JsonMentionV1 {
     pub uuid: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
-pub struct JsonMessageEnvelopeV1 {
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(rename = "callMessage")]
-    pub call_message: Option<JsonCallMessageV0>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(rename = "dataMessage")]
-    pub data_message: Option<JsonDataMessageV1>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(rename = "hasContent")]
-    pub has_content: Option<bool>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(rename = "hasLegacyMessage")]
-    pub has_legacy_message: Option<bool>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(rename = "isUnidentifiedSender")]
-    pub is_unidentified_sender: Option<bool>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub receipt: Option<JsonReceiptMessageV0>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub relay: Option<String>,
-    /// Example: 161557644247580
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(rename = "serverDeliveredTimestamp")]
-    pub server_delivered_timestamp: Option<i64>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(rename = "serverTimestamp")]
-    pub server_timestamp: Option<i64>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub source: Option<JsonAddressV1>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(rename = "sourceDevice")]
-    pub source_device: Option<i32>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(rename = "syncMessage")]
-    pub sync_message: Option<JsonSyncMessageV1>,
-    /// Example: 1615576442475
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub timestamp: Option<i64>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(rename = "timestampISO")]
-    pub timestamp_iso: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(rename = "type")]
-    pub type_: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub typing: Option<JsonTypingMessageV0>,
-    /// Example: "+12024561414"
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub username: Option<String>,
-    /// Example: "0cc10e61-d64c-4dbc-b51c-334f7dd45a4a"
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub uuid: Option<String>,
-}
-
-#[derive(Serialize, Deserialize, Clone, Default)]
+/// Responses to message requests from unknown users or groups
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct JsonMessageRequestResponseMessageV1 {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(rename = "groupId")]
     pub group_id: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub person: Option<JsonAddressV1>,
+    /// One of UNKNOWN, ACCEPT, DELETE, BLOCK, BLOCK_AND_DELETE, UNBLOCK_AND_ACCEPT
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(rename = "type")]
     pub type_: Option<String>,
 }
 
 /// metadata about one of the links in a message
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct JsonPreviewV1 {
     /// an optional image file attached to the preview
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -875,7 +1108,7 @@ pub struct JsonPreviewV1 {
 }
 
 /// A quote is a reply to a previous message. ID is the sent time of the message being replied to
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct JsonQuoteV1 {
     /// list of files attached to the quoted message
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -896,7 +1129,7 @@ pub struct JsonQuoteV1 {
     pub text: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct JsonReactionV1 {
     /// the emoji to react with
     /// Example: "?"
@@ -916,7 +1149,7 @@ pub struct JsonReactionV1 {
     pub target_sent_timestamp: Option<i64>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct JsonReadMessageV1 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub sender: Option<JsonAddressV1>,
@@ -925,7 +1158,7 @@ pub struct JsonReadMessageV1 {
     pub timestamp: Option<i64>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct JsonSendMessageResultV1 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub address: Option<JsonAddressV1>,
@@ -937,6 +1170,8 @@ pub struct JsonSendMessageResultV1 {
     #[serde(rename = "networkFailure")]
     pub network_failure: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub proof_required_failure: Option<ProofRequiredErrorV1>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub success: Option<SendSuccessV1>,
     /// Example: false
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -944,7 +1179,7 @@ pub struct JsonSendMessageResultV1 {
     pub unregistered_failure: Option<bool>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct JsonSentTranscriptMessageV1 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub destination: Option<JsonAddressV1>,
@@ -956,6 +1191,8 @@ pub struct JsonSentTranscriptMessageV1 {
     pub is_recipient_update: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub message: Option<JsonDataMessageV1>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub story: Option<StoryMessageV1>,
     /// Example: 1615576442475
     #[serde(skip_serializing_if = "Option::is_none")]
     pub timestamp: Option<i64>,
@@ -964,7 +1201,7 @@ pub struct JsonSentTranscriptMessageV1 {
     pub unidentified_status: Option<HashMap<String, String>>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct JsonSyncMessageV1 {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(rename = "blockedList")]
@@ -1001,7 +1238,7 @@ pub struct JsonSyncMessageV1 {
     pub view_once_open: Option<JsonViewOnceOpenMessageV1>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct JsonVerifiedMessageV1 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub destination: Option<JsonAddressV1>,
@@ -1014,23 +1251,23 @@ pub struct JsonVerifiedMessageV1 {
     pub verified: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct JsonVersionMessageV1 {
-    /// Example: "main"
+    /// Example: "call-signaling"
     #[serde(skip_serializing_if = "Option::is_none")]
     pub branch: Option<String>,
-    /// Example: "7fb323214faf9924355b73a6a383ce8c0137c8d0"
+    /// Example: "d745ad70473054386b8046c7bfd52a6809d2a74d"
     #[serde(skip_serializing_if = "Option::is_none")]
     pub commit: Option<String>,
     /// Example: "signald"
     #[serde(skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
-    /// Example: "0.15.0-6-7fb32321"
+    /// Example: "0.20.0-9-d745ad70"
     #[serde(skip_serializing_if = "Option::is_none")]
     pub version: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct JsonViewOnceOpenMessageV1 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub sender: Option<JsonAddressV1>,
@@ -1039,10 +1276,10 @@ pub struct JsonViewOnceOpenMessageV1 {
     pub timestamp: Option<i64>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct LeaveGroupRequestV1 {
     /// The account to use
-    /// Example: "+12024561414"
+    /// Example: "0cc10e61-d64c-4dbc-b51c-334f7dd45a4a"
     #[serde(skip_serializing_if = "Option::is_none")]
     pub account: Option<String>,
     /// The group to leave
@@ -1052,13 +1289,13 @@ pub struct LeaveGroupRequestV1 {
     pub group_id: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct LinkedDevicesV1 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub devices: Option<Vec<DeviceInfoV1>>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct LinkingURIV1 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub session_id: Option<String>,
@@ -1067,11 +1304,12 @@ pub struct LinkingURIV1 {
 }
 
 /// return all local accounts
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct ListAccountsRequestV1;
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct ListContactsRequestV1 {
+    /// Example: "0cc10e61-d64c-4dbc-b51c-334f7dd45a4a"
     #[serde(skip_serializing_if = "Option::is_none")]
     pub account: Option<String>,
     /// return results from local store immediately, refreshing from server afterward if needed. If false (default), block until all pending profiles have been retrieved.
@@ -1080,23 +1318,24 @@ pub struct ListContactsRequestV1 {
     pub async_: Option<bool>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct ListGroupsRequestV1 {
+    /// Example: "0cc10e61-d64c-4dbc-b51c-334f7dd45a4a"
     #[serde(skip_serializing_if = "Option::is_none")]
     pub account: Option<String>,
 }
 
-/// indicates when the incoming connection to the signal server has started or stopped
-#[derive(Serialize, Deserialize, Clone, Default)]
+/// prior attempt to indicate signald connectivity state. WebSocketConnectionState messages will be delivered at the  same time as well as in other parts of the websocket lifecycle.
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct ListenerStateV1 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub connected: Option<bool>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct MarkReadRequestV1 {
     /// The account to interact with
-    /// Example: "+12024561414"
+    /// Example: "0cc10e61-d64c-4dbc-b51c-334f7dd45a4a"
     #[serde(skip_serializing_if = "Option::is_none")]
     pub account: Option<String>,
     /// List of messages to mark as read
@@ -1110,19 +1349,19 @@ pub struct MarkReadRequestV1 {
     pub when: Option<i64>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct NoKnownUUIDErrorV1 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub message: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct NoSendPermissionErrorV1 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub message: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct NoSuchAccountErrorV1 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub account: Option<String>,
@@ -1130,13 +1369,13 @@ pub struct NoSuchAccountErrorV1 {
     pub message: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct NoSuchSessionErrorV1 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub message: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct OfferMessageV1 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub id: Option<i64>,
@@ -1149,14 +1388,22 @@ pub struct OfferMessageV1 {
     pub type_: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct OwnProfileKeyDoesNotExistErrorV1 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub message: Option<String>,
 }
 
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
+pub struct PagingDataV1 {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub has_more_pages: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub next_page_revision: Option<i32>,
+}
+
 /// details about a MobileCoin payment
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct PaymentV1 {
     /// note attached to the payment
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -1167,7 +1414,7 @@ pub struct PaymentV1 {
 }
 
 /// Information about a Signal user
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct ProfileV1 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub about: Option<String>,
@@ -1181,6 +1428,9 @@ pub struct ProfileV1 {
     /// color of the chat with this user
     #[serde(skip_serializing_if = "Option::is_none")]
     pub color: Option<String>,
+    /// The user's name from local contact names
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub contact_name: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub emoji: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -1196,29 +1446,97 @@ pub struct ProfileV1 {
     /// The user's Signal profile name
     #[serde(skip_serializing_if = "Option::is_none")]
     pub profile_name: Option<String>,
+    /// currently unclear how these work, as they are not available in the production Signal apps
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub visible_badge_ids: Option<Vec<String>>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct ProfileListV1 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub profiles: Option<Vec<ProfileV1>>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct ProfileUnavailableErrorV1 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub message: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
+pub struct ProofRequiredErrorV1 {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub message: Option<String>,
+    /// possible list values are RECAPTCHA and PUSH_CHALLENGE
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub options: Option<Vec<String>>,
+    /// value in seconds
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub retry_after: Option<i64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub token: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
+pub struct ProtocolInvalidKeyIdErrorV1 {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub content_hint: Option<i32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub group_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub message: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub sender: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub sender_device: Option<i32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub timestamp: Option<i64>,
+}
+
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
+pub struct ProtocolInvalidMessageErrorV1 {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub content_hint: Option<i32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub group_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub message: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub sender: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub sender_device: Option<i32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub timestamp: Option<i64>,
+}
+
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
+pub struct ProtocolNoSessionErrorV1 {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub content_hint: Option<i32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub group_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub message: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub sender: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub sender_device: Option<i32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub timestamp: Option<i64>,
+}
+
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct RateLimitErrorV1 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub message: Option<String>,
 }
 
 /// react to a previous message
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct ReactRequestV1 {
+    /// Optionally set to a sub-set of group members. Ignored if recipientGroupId isn't specified
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub members: Option<Vec<JsonAddressV1>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub reaction: Option<JsonReactionV1>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -1235,7 +1553,7 @@ pub struct ReactRequestV1 {
     pub username: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct ReceiptMessageV1 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub timestamps: Option<Vec<i64>>,
@@ -1248,12 +1566,14 @@ pub struct ReceiptMessageV1 {
 }
 
 /// deny a request to join a group
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct RefuseMembershipRequestV1 {
     /// The account to interact with
-    /// Example: "+12024561414"
+    /// Example: "0cc10e61-d64c-4dbc-b51c-334f7dd45a4a"
     #[serde(skip_serializing_if = "Option::is_none")]
     pub account: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub also_ban: Option<bool>,
     /// Example: "EdSqI90cS0UomDpgUXOlCoObWvQOXlH5G3Z2d3f4ayE="
     #[serde(skip_serializing_if = "Option::is_none")]
     pub group_id: Option<String>,
@@ -1263,7 +1583,7 @@ pub struct RefuseMembershipRequestV1 {
 }
 
 /// begin the account registration process by requesting a phone number verification code. when the code is received, submit it with a verify request
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct RegisterRequestV1 {
     /// the e164 phone number to register with
     /// Example: "+12024561414"
@@ -1281,7 +1601,7 @@ pub struct RegisterRequestV1 {
 }
 
 /// A remote config (feature flag) entry.
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct RemoteConfigV1 {
     /// The name of this remote config entry. These names may be prefixed with the platform type ("android.", "ios.", "desktop.", etc.) Typically, clients only handle the relevant configs for its platform, hardcoding the names it cares about handling and ignoring the rest.
     /// Example: desktop.mediaQuality.levels
@@ -1293,32 +1613,32 @@ pub struct RemoteConfigV1 {
     pub value: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct RemoteConfigListV1 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub config: Option<Vec<RemoteConfigV1>>,
 }
 
 /// Retrieves the remote config (feature flags) from the server.
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct RemoteConfigRequestV1 {
     /// The account to use to retrieve the remote config
-    /// Example: "+12024561414"
+    /// Example: "0cc10e61-d64c-4dbc-b51c-334f7dd45a4a"
     #[serde(skip_serializing_if = "Option::is_none")]
     pub account: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct RemoteDeleteV1 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub target_sent_timestamp: Option<i64>,
 }
 
 /// delete a message previously sent
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct RemoteDeleteRequestV1 {
     /// the account to use
-    /// Example: "+12024561414"
+    /// Example: "0cc10e61-d64c-4dbc-b51c-334f7dd45a4a"
     #[serde(skip_serializing_if = "Option::is_none")]
     pub account: Option<String>,
     /// the address to send the delete message to. should match address the message to be deleted was sent to. required if group is not set.
@@ -1328,12 +1648,15 @@ pub struct RemoteDeleteRequestV1 {
     /// Example: "EdSqI90cS0UomDpgUXOlCoObWvQOXlH5G3Z2d3f4ayE="
     #[serde(skip_serializing_if = "Option::is_none")]
     pub group: Option<String>,
+    /// Optionally set to a sub-set of group members. Ignored if group isn't specified
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub members: Option<Vec<JsonAddressV1>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub timestamp: Option<i64>,
 }
 
 /// Remove a linked device from the Signal account. Only allowed when the local device id is 1
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct RemoveLinkedDeviceRequestV1 {
     /// The account to interact with
     /// Example: "+12024561414"
@@ -1346,17 +1669,17 @@ pub struct RemoveLinkedDeviceRequestV1 {
     pub device_id: Option<i64>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct RemoveServerRequestV1 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub uuid: Option<String>,
 }
 
 /// Request other devices on the account send us their group list, syncable config and contact list.
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct RequestSyncRequestV1 {
     /// The account to use
-    /// Example: "+12024561414"
+    /// Example: "0cc10e61-d64c-4dbc-b51c-334f7dd45a4a"
     #[serde(skip_serializing_if = "Option::is_none")]
     pub account: Option<String>,
     /// request block list sync (default true)
@@ -1371,13 +1694,16 @@ pub struct RequestSyncRequestV1 {
     /// request group sync (default true)
     #[serde(skip_serializing_if = "Option::is_none")]
     pub groups: Option<bool>,
+    /// request storage service keys
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub keys: Option<bool>,
 }
 
 /// reset a session with a particular user
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct ResetSessionRequestV1 {
     /// The account to use
-    /// Example: "+12024561414"
+    /// Example: "0cc10e61-d64c-4dbc-b51c-334f7dd45a4a"
     #[serde(skip_serializing_if = "Option::is_none")]
     pub account: Option<String>,
     /// the user to reset session with
@@ -1388,10 +1714,10 @@ pub struct ResetSessionRequestV1 {
 }
 
 /// Resolve a partial JsonAddress with only a number or UUID to one with both. Anywhere that signald accepts a JsonAddress will except a partial, this is a convenience function for client authors, mostly because signald doesn't resolve all the partials it returns.
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct ResolveAddressRequestV1 {
     /// The signal account to use
-    /// Example: "+12024561414"
+    /// Example: "0cc10e61-d64c-4dbc-b51c-334f7dd45a4a"
     #[serde(skip_serializing_if = "Option::is_none")]
     pub account: Option<String>,
     /// The partial address, missing fields
@@ -1399,11 +1725,63 @@ pub struct ResolveAddressRequestV1 {
     pub partial: Option<JsonAddressV1>,
 }
 
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
+pub struct SQLErrorV1 {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub message: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
+pub struct ScanTimeoutErrorV1 {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub message: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
+pub struct SendCallOfferRequestV1 {
+    /// the local account to use
+    /// Example: "0cc10e61-d64c-4dbc-b51c-334f7dd45a4a"
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub account: Option<String>,
+    /// the id of the call
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub call_id: Option<i64>,
+    /// must be one of 'audio_call' or 'video_call'
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub call_type: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub destination_device_id: Option<i32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub multring: Option<bool>,
+    /// the address of the caller
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub recipient: Option<JsonAddressV1>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub sdp: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
+pub struct SendIceUpdatesRequestV1 {
+    /// the local account to use
+    /// Example: "0cc10e61-d64c-4dbc-b51c-334f7dd45a4a"
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub account: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub destination_device_id: Option<i32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub multiring: Option<bool>,
+    /// the address of the caller
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub recipient: Option<JsonAddressV1>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub updates: Option<Vec<IceUpdateMessageV1>>,
+}
+
 /// send a mobilecoin payment
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct SendPaymentRequestV1 {
     /// the account to use
-    /// Example: "+12024561414"
+    /// Example: "0cc10e61-d64c-4dbc-b51c-334f7dd45a4a"
     #[serde(skip_serializing_if = "Option::is_none")]
     pub account: Option<String>,
     /// the address to send the payment message to
@@ -1415,10 +1793,16 @@ pub struct SendPaymentRequestV1 {
     pub when: Option<i64>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct SendRequestV1 {
+    /// Example: "0cc10e61-d64c-4dbc-b51c-334f7dd45a4a"
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub account: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub attachments: Option<Vec<JsonAttachmentV1>>,
+    /// Optionally set to a sub-set of group members. Ignored if recipientGroupId isn't specified
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub members: Option<Vec<JsonAddressV1>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub mentions: Option<Vec<JsonMentionV1>>,
     /// Example: "hello"
@@ -1443,7 +1827,7 @@ pub struct SendRequestV1 {
     pub username: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct SendResponseV1 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub results: Option<Vec<JsonSendMessageResultV1>>,
@@ -1452,7 +1836,7 @@ pub struct SendResponseV1 {
     pub timestamp: Option<i64>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct SendSuccessV1 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub devices: Option<Vec<i32>>,
@@ -1465,8 +1849,22 @@ pub struct SendSuccessV1 {
     pub unidentified: Option<bool>,
 }
 
+/// Sends a sync message to the account's devices
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
+pub struct SendSyncMessageRequestV1 {
+    /// Example: "0cc10e61-d64c-4dbc-b51c-334f7dd45a4a"
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub account: Option<String>,
+    /// This can be set to indicate to other devices about a response to an incoming message request from an unknown user or group. Warning: Using the BLOCK and BLOCK_AND_DELETE options relies on other devices to do the blocking, and it does not make you leave the group!
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub message_request_response: Option<JsonMessageRequestResponseMessageV1>,
+    /// This can be set to indicate to other devices about having viewed a view-once message.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub view_once_open_message: Option<JsonViewOnceOpenMessageV1>,
+}
+
 /// a Signal server
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct ServerV1 {
     /// base64 encoded trust store, password must be 'whisper'
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -1506,7 +1904,7 @@ pub struct ServerV1 {
     pub zk_param: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct ServerCDNV1 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub number: Option<i32>,
@@ -1514,13 +1912,13 @@ pub struct ServerCDNV1 {
     pub url: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct ServerListV1 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub servers: Option<Vec<ServerV1>>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct ServerNotFoundErrorV1 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub message: Option<String>,
@@ -1528,11 +1926,11 @@ pub struct ServerNotFoundErrorV1 {
     pub uuid: Option<String>,
 }
 
-/// set this device's name. This will show up on the mobile device on the same account under 
-#[derive(Serialize, Deserialize, Clone, Default)]
+/// set this device's name. This will show up on the mobile device on the same account under settings -> linked devices
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct SetDeviceNameRequestV1 {
     /// The account to set the device name of
-    /// Example: "+12024561414"
+    /// Example: "0cc10e61-d64c-4dbc-b51c-334f7dd45a4a"
     #[serde(skip_serializing_if = "Option::is_none")]
     pub account: Option<String>,
     /// The device name
@@ -1541,10 +1939,10 @@ pub struct SetDeviceNameRequestV1 {
 }
 
 /// Set the message expiration timer for a thread. Expiration must be specified in seconds, set to 0 to disable timer
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct SetExpirationRequestV1 {
     /// The account to use
-    /// Example: "+12024561414"
+    /// Example: "0cc10e61-d64c-4dbc-b51c-334f7dd45a4a"
     #[serde(skip_serializing_if = "Option::is_none")]
     pub account: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -1557,9 +1955,9 @@ pub struct SetExpirationRequestV1 {
     pub group: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct SetProfileV1 {
-    /// an optional about string. If unset, null or an empty string will unset profile about field
+    /// Change the 'about' profile field
     #[serde(skip_serializing_if = "Option::is_none")]
     pub about: Option<String>,
     /// The phone number of the account to use
@@ -1571,32 +1969,194 @@ pub struct SetProfileV1 {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(rename = "avatarFile")]
     pub avatar_file: Option<String>,
-    /// an optional single emoji character. If unset, null or an empty string will unset profile emoji
+    /// Change the profile emoji
     #[serde(skip_serializing_if = "Option::is_none")]
     pub emoji: Option<String>,
-    /// an optional *base64-encoded* MobileCoin address to set in the profile. Note that this is not the traditional MobileCoin address encoding, which is custom. Clients are responsible for converting between MobileCoin's custom base58 on the user-facing side and base64 encoding on the signald side. If unset, null or an empty string, will empty the profile payment address
+    /// Change the profile payment address. Payment address must be a *base64-encoded* MobileCoin address. Note that this is not the traditional MobileCoin address encoding, which is custom. Clients are responsible for converting between MobileCoin's custom base58 on the user-facing side and base64 encoding on the signald side.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub mobilecoin_address: Option<String>,
-    /// New profile name. Set to empty string for no profile name
+    /// Change the profile name
     /// Example: "signald user"
     #[serde(skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
+    /// configure visible badge IDs
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub visible_badge_ids: Option<Vec<String>>,
+}
+
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
+pub struct SharedContactV1 {
+    /// the physical addresses of the shared contact
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub address: Option<Vec<SharedContactAddressV1>>,
+    /// the profile picture/avatar of the shared contact
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub avatar: Option<SharedContactAvatarV1>,
+    /// the email addresses of the shared contact
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub email: Option<Vec<SharedContactEmailV1>>,
+    /// the name of the shared contact
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub name: Option<SharedContactNameV1>,
+    /// the organization (e.g. workplace) of the shared contact
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub organization: Option<String>,
+    /// the phone numbers of the shared contact
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub phone: Option<Vec<SharedContactPhoneV1>>,
+}
+
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
+pub struct SharedContactAddressV1 {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub city: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub country: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub label: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub neighborhood: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub pobox: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub postcode: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub region: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub street: Option<String>,
+    /// the type of address (options: HOME, WORK, CUSTOM)
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(rename = "type")]
+    pub type_: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
+pub struct SharedContactAvatarV1 {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub attachment: Option<JsonAttachmentV1>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub is_profile: Option<bool>,
+}
+
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
+pub struct SharedContactEmailV1 {
+    /// the type label when type is CUSTOM
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub label: Option<String>,
+    /// the type of email (options: HOME, WORK, MOBILE, CUSTOM)
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(rename = "type")]
+    pub type_: Option<String>,
+    /// the email address
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub value: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
+pub struct SharedContactNameV1 {
+    /// the full name that should be displayed
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub display: Option<String>,
+    /// family name (surname)
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub family: Option<String>,
+    /// given name
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub given: Option<String>,
+    /// middle name
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub middle: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub prefix: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub suffix: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
+pub struct SharedContactPhoneV1 {
+    /// the type label when type is CUSTOM
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub label: Option<String>,
+    /// the type of phone (options: HOME, WORK, MOBILE, CUSTOM)
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(rename = "type")]
+    pub type_: Option<String>,
+    /// the phone number
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub value: Option<String>,
+}
+
+/// Broadcast to subscribed clients when there is a state change from the storage service
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
+pub struct StorageChangeV1 {
+    /// Seems to behave like the group version numbers and increments every time the state changes
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub version: Option<i64>,
+}
+
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
+pub struct StoryContextV1 {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub author: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub sent_timestamp: Option<i64>,
+}
+
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
+pub struct StoryMessageV1 {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub allow_replies: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub file: Option<JsonAttachmentV1>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub group: Option<JsonGroupV2InfoV1>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub text: Option<TextAttachmentV1>,
+}
+
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
+pub struct SubmitChallengeRequestV1 {
+    /// Example: "0cc10e61-d64c-4dbc-b51c-334f7dd45a4a"
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub account: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub captcha_token: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub challenge: Option<String>,
 }
 
 /// receive incoming messages. After making a subscribe request, incoming messages will be sent to the client encoded as ClientMessageWrapper. Send an unsubscribe request or disconnect from the socket to stop receiving messages.
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct SubscribeRequestV1 {
     /// The account to subscribe to incoming message for
-    /// Example: "+12024561414"
+    /// Example: "0cc10e61-d64c-4dbc-b51c-334f7dd45a4a"
     #[serde(skip_serializing_if = "Option::is_none")]
     pub account: Option<String>,
 }
 
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
+pub struct TextAttachmentV1 {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub background_color: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub background_gradient: Option<GradientV1>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub preview: Option<JsonPreviewV1>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub style: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub text: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub text_background_color: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub text_foreground_color: Option<String>,
+}
+
 /// Trust another user's safety number using either the QR code data or the safety number text
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct TrustRequestV1 {
     /// The account to interact with
-    /// Example: "+12024561414"
+    /// Example: "0cc10e61-d64c-4dbc-b51c-334f7dd45a4a"
     #[serde(skip_serializing_if = "Option::is_none")]
     pub account: Option<String>,
     /// The user to query identity keys for
@@ -1615,7 +2175,7 @@ pub struct TrustRequestV1 {
     pub trust_level: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct TypingMessageV1 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub action: Option<String>,
@@ -1626,10 +2186,10 @@ pub struct TypingMessageV1 {
 }
 
 /// send a typing started or stopped message
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct TypingRequestV1 {
     /// The account to use
-    /// Example: "+12024561414"
+    /// Example: "0cc10e61-d64c-4dbc-b51c-334f7dd45a4a"
     #[serde(skip_serializing_if = "Option::is_none")]
     pub account: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -1644,28 +2204,59 @@ pub struct TypingRequestV1 {
     pub when: Option<i64>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+/// Unbans users from a group.
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
+pub struct UnbanUserRequestV1 {
+    /// The account to interact with
+    /// Example: "0cc10e61-d64c-4dbc-b51c-334f7dd45a4a"
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub account: Option<String>,
+    /// Example: "EdSqI90cS0UomDpgUXOlCoObWvQOXlH5G3Z2d3f4ayE="
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub group_id: Option<String>,
+    /// List of users to unban
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub users: Option<Vec<JsonAddressV1>>,
+}
+
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct UnknownGroupErrorV1 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub message: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct UnknownIdentityKeyErrorV1 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub message: Option<String>,
 }
 
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
+pub struct UnregisteredUserErrorV1 {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(rename = "e164_number")]
+    pub e_164_number: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub message: Option<String>,
+}
+
 /// See subscribe for more info
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct UnsubscribeRequestV1 {
     /// The account to unsubscribe from
-    /// Example: "+12024561414"
+    /// Example: "0cc10e61-d64c-4dbc-b51c-334f7dd45a4a"
     #[serde(skip_serializing_if = "Option::is_none")]
     pub account: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+/// returned in response to use v1 groups, which are no longer supported
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
+pub struct UnsupportedGroupErrorV1 {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub message: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct UntrustedIdentityErrorV1 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub identifier: Option<String>,
@@ -1676,8 +2267,9 @@ pub struct UntrustedIdentityErrorV1 {
 }
 
 /// update information about a local contact
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct UpdateContactRequestV1 {
+    /// Example: "0cc10e61-d64c-4dbc-b51c-334f7dd45a4a"
     #[serde(skip_serializing_if = "Option::is_none")]
     pub account: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -1691,10 +2283,10 @@ pub struct UpdateContactRequestV1 {
 }
 
 /// modify a group. Note that only one modification action may be performed at once
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct UpdateGroupRequestV1 {
     /// The identifier of the account to interact with
-    /// Example: "+12024561414"
+    /// Example: "0cc10e61-d64c-4dbc-b51c-334f7dd45a4a"
     #[serde(skip_serializing_if = "Option::is_none")]
     pub account: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -1738,7 +2330,7 @@ pub struct UpdateGroupRequestV1 {
     pub update_timer: Option<i32>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct UserAlreadyExistsErrorV1 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub message: Option<String>,
@@ -1747,7 +2339,7 @@ pub struct UserAlreadyExistsErrorV1 {
 }
 
 /// verify an account's phone number with a code after registering, completing the account creation process
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct VerifyRequestV1 {
     /// the e164 phone number being verified
     /// Example: "+12024561414"
@@ -1759,10 +2351,28 @@ pub struct VerifyRequestV1 {
     pub code: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct VersionRequestV1;
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+/// An optional part of the linking process. Intended to be called after displaying the QR code, will return quickly after the user scans the QR code. finish_link must be called after wait_for_scan returns a non-error
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
+pub struct WaitForScanRequestV1 {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub session_id: Option<String>,
+}
+
+/// indicates when the websocket connection state to the signal server has changed
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
+pub struct WebSocketConnectionStateV1 {
+    /// One of: UNIDENTIFIED, IDENTIFIED
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub socket: Option<String>,
+    /// One of: DISCONNECTED, CONNECTING, CONNECTED, RECONNECTING, DISCONNECTING, AUTHENTICATION_FAILED, FAILED
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub state: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct AnswerMessageV0 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub id: Option<i64>,
@@ -1772,13 +2382,13 @@ pub struct AnswerMessageV0 {
     pub sdp: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct BusyMessageV0 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub id: Option<i64>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct ConfigurationMessageV0 {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(rename = "linkPreviews")]
@@ -1795,7 +2405,7 @@ pub struct ConfigurationMessageV0 {
 }
 
 /// group access control settings. Options for each controlled action are: UNKNOWN, ANY, MEMBER, ADMINISTRATOR, UNSATISFIABLE and UNRECOGNIZED
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct GroupAccessControlV0 {
     /// who can edit group info
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -1809,7 +2419,7 @@ pub struct GroupAccessControlV0 {
     pub members: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct GroupMemberV0 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub joined_revision: Option<i32>,
@@ -1822,7 +2432,7 @@ pub struct GroupMemberV0 {
     pub uuid: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct HangupMessageV0 {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(rename = "deviceId")]
@@ -1836,7 +2446,7 @@ pub struct HangupMessageV0 {
     pub type_: Option<TypeV0>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct IceUpdateMessageV0 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub id: Option<i64>,
@@ -1846,7 +2456,7 @@ pub struct IceUpdateMessageV0 {
     pub sdp: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct JsonAccountV0 {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(rename = "deviceId")]
@@ -1865,13 +2475,13 @@ pub struct JsonAccountV0 {
     pub uuid: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct JsonAccountListV0 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub accounts: Option<Vec<JsonAccountV0>>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct JsonAddressV0 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub number: Option<String>,
@@ -1881,7 +2491,7 @@ pub struct JsonAddressV0 {
     pub uuid: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct JsonAttachmentV0 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub blurhash: Option<String>,
@@ -1915,7 +2525,7 @@ pub struct JsonAttachmentV0 {
     pub width: Option<i32>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct JsonBlockedListMessageV0 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub addresses: Option<Vec<JsonAddressV0>>,
@@ -1924,7 +2534,7 @@ pub struct JsonBlockedListMessageV0 {
     pub group_ids: Option<Vec<String>>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct JsonCallMessageV0 {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(rename = "answerMessage")]
@@ -1949,7 +2559,7 @@ pub struct JsonCallMessageV0 {
     pub offer_message: Option<OfferMessageV0>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct JsonDataMessageV0 {
     /// files attached to the incoming message
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -2007,7 +2617,7 @@ pub struct JsonDataMessageV0 {
     pub view_once: Option<bool>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct JsonGroupInfoV0 {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(rename = "avatarId")]
@@ -2024,7 +2634,7 @@ pub struct JsonGroupInfoV0 {
     pub type_: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct JsonGroupV2InfoV0 {
     /// current access control settings for this group
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -2070,7 +2680,7 @@ pub struct JsonGroupV2InfoV0 {
     pub title: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct JsonMentionV0 {
     /// The length of the mention represented in the message. Seems to always be 1 but included here in case that changes.
     /// Example: 1
@@ -2086,7 +2696,7 @@ pub struct JsonMentionV0 {
     pub uuid: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct JsonMessageEnvelopeV0 {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(rename = "callMessage")]
@@ -2142,7 +2752,7 @@ pub struct JsonMessageEnvelopeV0 {
     pub uuid: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct JsonMessageRequestResponseMessageV0 {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(rename = "groupId")]
@@ -2154,7 +2764,7 @@ pub struct JsonMessageRequestResponseMessageV0 {
     pub type_: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct JsonPreviewV0 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub attachment: Option<JsonAttachmentV0>,
@@ -2165,7 +2775,7 @@ pub struct JsonPreviewV0 {
 }
 
 /// A quote is a reply to a previous message. ID is the sent time of the message being replied to
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct JsonQuoteV0 {
     /// list of files attached to the quoted message
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -2186,7 +2796,7 @@ pub struct JsonQuoteV0 {
     pub text: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct JsonQuotedAttachmentV0 {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(rename = "contentType")]
@@ -2198,7 +2808,7 @@ pub struct JsonQuotedAttachmentV0 {
     pub thumbnail: Option<JsonAttachmentV0>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct JsonReactionV0 {
     /// the emoji to react with
     /// Example: "?"
@@ -2218,7 +2828,7 @@ pub struct JsonReactionV0 {
     pub target_sent_timestamp: Option<i64>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct JsonReadMessageV0 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub sender: Option<JsonAddressV0>,
@@ -2227,7 +2837,7 @@ pub struct JsonReadMessageV0 {
     pub timestamp: Option<i64>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct JsonReceiptMessageV0 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub timestamps: Option<Vec<i64>>,
@@ -2238,7 +2848,7 @@ pub struct JsonReceiptMessageV0 {
     pub when: Option<i64>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct JsonSentTranscriptMessageV0 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub destination: Option<JsonAddressV0>,
@@ -2258,7 +2868,7 @@ pub struct JsonSentTranscriptMessageV0 {
     pub unidentified_status: Option<HashMap<String, String>>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct JsonStickerV0 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub attachment: Option<JsonAttachmentV0>,
@@ -2275,7 +2885,7 @@ pub struct JsonStickerV0 {
     pub sticker_id: Option<i32>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct JsonStickerPackOperationMessageV0 {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(rename = "packID")]
@@ -2288,7 +2898,7 @@ pub struct JsonStickerPackOperationMessageV0 {
     pub type_: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct JsonSyncMessageV0 {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(rename = "blockedList")]
@@ -2325,7 +2935,7 @@ pub struct JsonSyncMessageV0 {
     pub view_once_open: Option<JsonViewOnceOpenMessageV0>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct JsonTypingMessageV0 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub action: Option<String>,
@@ -2336,7 +2946,7 @@ pub struct JsonTypingMessageV0 {
     pub timestamp: Option<i64>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct JsonVerifiedMessageV0 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub destination: Option<JsonAddressV0>,
@@ -2349,7 +2959,7 @@ pub struct JsonVerifiedMessageV0 {
     pub verified: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct JsonViewOnceOpenMessageV0 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub sender: Option<JsonAddressV0>,
@@ -2358,7 +2968,7 @@ pub struct JsonViewOnceOpenMessageV0 {
     pub timestamp: Option<i64>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct NameV0 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub display: Option<OptionalV0>,
@@ -2374,7 +2984,7 @@ pub struct NameV0 {
     pub suffix: Option<OptionalV0>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct OfferMessageV0 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub id: Option<i64>,
@@ -2387,20 +2997,22 @@ pub struct OfferMessageV0 {
     pub type_: Option<TypeV0>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct OptionalV0 {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub empty: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub present: Option<bool>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct RemoteDeleteV0 {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(rename = "targetSentTimestamp")]
     pub target_sent_timestamp: Option<i64>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct SharedContactV0 {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub address: Option<OptionalV0>,
@@ -2416,7 +3028,7 @@ pub struct SharedContactV0 {
     pub phone: Option<OptionalV0>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct TypeV0;
 
 #[derive(Serialize, Deserialize)]
@@ -2433,8 +3045,14 @@ pub enum SignaldTypes {
     AddLinkedDeviceRequestV1(AddLinkedDeviceRequestV1),
     AddServerRequestV1(AddServerRequestV1),
     AllIdentityKeyListV1(AllIdentityKeyListV1),
+    AnswerCallRequestV1(AnswerCallRequestV1),
     AnswerMessageV1(AnswerMessageV1),
     ApproveMembershipRequestV1(ApproveMembershipRequestV1),
+    AttachmentTooLargeErrorV1(AttachmentTooLargeErrorV1),
+    AuthorizationFailedErrorV1(AuthorizationFailedErrorV1),
+    BanUserRequestV1(BanUserRequestV1),
+    BannedGroupMemberV1(BannedGroupMemberV1),
+    BooleanMessageV1(BooleanMessageV1),
     BusyMessageV1(BusyMessageV1),
     CallMessageV1(CallMessageV1),
     CapabilitiesV1(CapabilitiesV1),
@@ -2443,23 +3061,33 @@ pub enum SignaldTypes {
     CreateGroupRequestV1(CreateGroupRequestV1),
     DeleteAccountRequestV1(DeleteAccountRequestV1),
     DeviceInfoV1(DeviceInfoV1),
+    DuplicateMessageErrorV1(DuplicateMessageErrorV1),
     FingerprintVersionMismatchErrorV1(FingerprintVersionMismatchErrorV1),
     FinishLinkRequestV1(FinishLinkRequestV1),
     GenerateLinkingURIRequestV1(GenerateLinkingURIRequestV1),
     GetAllIdentitiesV1(GetAllIdentitiesV1),
     GetGroupRequestV1(GetGroupRequestV1),
+    GetGroupRevisionPagesRequestV1(GetGroupRevisionPagesRequestV1),
     GetIdentitiesRequestV1(GetIdentitiesRequestV1),
     GetLinkedDevicesRequestV1(GetLinkedDevicesRequestV1),
     GetProfileRequestV1(GetProfileRequestV1),
     GetServersRequestV1(GetServersRequestV1),
+    GradientV1(GradientV1),
     GroupAccessControlV1(GroupAccessControlV1),
+    GroupChangeV1(GroupChangeV1),
+    GroupHistoryEntryV1(GroupHistoryEntryV1),
+    GroupHistoryPageV1(GroupHistoryPageV1),
     GroupInfoV1(GroupInfoV1),
     GroupLinkInfoRequestV1(GroupLinkInfoRequestV1),
     GroupLinkNotActiveErrorV1(GroupLinkNotActiveErrorV1),
     GroupListV1(GroupListV1),
     GroupMemberV1(GroupMemberV1),
     GroupNotActiveErrorV1(GroupNotActiveErrorV1),
+    GroupPatchNotAcceptedErrorV1(GroupPatchNotAcceptedErrorV1),
+    GroupPendingMemberV1(GroupPendingMemberV1),
+    GroupRequestingMemberV1(GroupRequestingMemberV1),
     GroupVerificationErrorV1(GroupVerificationErrorV1),
+    HangupCallRequestV1(HangupCallRequestV1),
     HangupMessageV1(HangupMessageV1),
     IceUpdateMessageV1(IceUpdateMessageV1),
     IdentityKeyV1(IdentityKeyV1),
@@ -2475,6 +3103,7 @@ pub enum SignaldTypes {
     InvalidProxyErrorV1(InvalidProxyErrorV1),
     InvalidRecipientErrorV1(InvalidRecipientErrorV1),
     InvalidRequestErrorV1(InvalidRequestErrorV1),
+    IsIdentifierRegisteredRequestV1(IsIdentifierRegisteredRequestV1),
     JoinGroupRequestV1(JoinGroupRequestV1),
     JsonAddressV1(JsonAddressV1),
     JsonAttachmentV1(JsonAttachmentV1),
@@ -2484,7 +3113,6 @@ pub enum SignaldTypes {
     JsonGroupJoinInfoV1(JsonGroupJoinInfoV1),
     JsonGroupV2InfoV1(JsonGroupV2InfoV1),
     JsonMentionV1(JsonMentionV1),
-    JsonMessageEnvelopeV1(JsonMessageEnvelopeV1),
     JsonMessageRequestResponseMessageV1(JsonMessageRequestResponseMessageV1),
     JsonPreviewV1(JsonPreviewV1),
     JsonQuoteV1(JsonQuoteV1),
@@ -2510,10 +3138,15 @@ pub enum SignaldTypes {
     NoSuchSessionErrorV1(NoSuchSessionErrorV1),
     OfferMessageV1(OfferMessageV1),
     OwnProfileKeyDoesNotExistErrorV1(OwnProfileKeyDoesNotExistErrorV1),
+    PagingDataV1(PagingDataV1),
     PaymentV1(PaymentV1),
     ProfileV1(ProfileV1),
     ProfileListV1(ProfileListV1),
     ProfileUnavailableErrorV1(ProfileUnavailableErrorV1),
+    ProofRequiredErrorV1(ProofRequiredErrorV1),
+    ProtocolInvalidKeyIdErrorV1(ProtocolInvalidKeyIdErrorV1),
+    ProtocolInvalidMessageErrorV1(ProtocolInvalidMessageErrorV1),
+    ProtocolNoSessionErrorV1(ProtocolNoSessionErrorV1),
     RateLimitErrorV1(RateLimitErrorV1),
     ReactRequestV1(ReactRequestV1),
     ReceiptMessageV1(ReceiptMessageV1),
@@ -2529,10 +3162,15 @@ pub enum SignaldTypes {
     RequestSyncRequestV1(RequestSyncRequestV1),
     ResetSessionRequestV1(ResetSessionRequestV1),
     ResolveAddressRequestV1(ResolveAddressRequestV1),
+    SQLErrorV1(SQLErrorV1),
+    ScanTimeoutErrorV1(ScanTimeoutErrorV1),
+    SendCallOfferRequestV1(SendCallOfferRequestV1),
+    SendIceUpdatesRequestV1(SendIceUpdatesRequestV1),
     SendPaymentRequestV1(SendPaymentRequestV1),
     SendRequestV1(SendRequestV1),
     SendResponseV1(SendResponseV1),
     SendSuccessV1(SendSuccessV1),
+    SendSyncMessageRequestV1(SendSyncMessageRequestV1),
     ServerV1(ServerV1),
     ServerCDNV1(ServerCDNV1),
     ServerListV1(ServerListV1),
@@ -2540,19 +3178,35 @@ pub enum SignaldTypes {
     SetDeviceNameRequestV1(SetDeviceNameRequestV1),
     SetExpirationRequestV1(SetExpirationRequestV1),
     SetProfileV1(SetProfileV1),
+    SharedContactV1(SharedContactV1),
+    SharedContactAddressV1(SharedContactAddressV1),
+    SharedContactAvatarV1(SharedContactAvatarV1),
+    SharedContactEmailV1(SharedContactEmailV1),
+    SharedContactNameV1(SharedContactNameV1),
+    SharedContactPhoneV1(SharedContactPhoneV1),
+    StorageChangeV1(StorageChangeV1),
+    StoryContextV1(StoryContextV1),
+    StoryMessageV1(StoryMessageV1),
+    SubmitChallengeRequestV1(SubmitChallengeRequestV1),
     SubscribeRequestV1(SubscribeRequestV1),
+    TextAttachmentV1(TextAttachmentV1),
     TrustRequestV1(TrustRequestV1),
     TypingMessageV1(TypingMessageV1),
     TypingRequestV1(TypingRequestV1),
+    UnbanUserRequestV1(UnbanUserRequestV1),
     UnknownGroupErrorV1(UnknownGroupErrorV1),
     UnknownIdentityKeyErrorV1(UnknownIdentityKeyErrorV1),
+    UnregisteredUserErrorV1(UnregisteredUserErrorV1),
     UnsubscribeRequestV1(UnsubscribeRequestV1),
+    UnsupportedGroupErrorV1(UnsupportedGroupErrorV1),
     UntrustedIdentityErrorV1(UntrustedIdentityErrorV1),
     UpdateContactRequestV1(UpdateContactRequestV1),
     UpdateGroupRequestV1(UpdateGroupRequestV1),
     UserAlreadyExistsErrorV1(UserAlreadyExistsErrorV1),
     VerifyRequestV1(VerifyRequestV1),
     VersionRequestV1(VersionRequestV1),
+    WaitForScanRequestV1(WaitForScanRequestV1),
+    WebSocketConnectionStateV1(WebSocketConnectionStateV1),
     AnswerMessageV0(AnswerMessageV0),
     BusyMessageV0(BusyMessageV0),
     ConfigurationMessageV0(ConfigurationMessageV0),

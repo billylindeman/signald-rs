@@ -24,7 +24,7 @@ where T: AsyncSocket,
         msg.push(b'\n');
 
         self.socket.write(&msg, &id).await?;
-        let response = self.socket.get_response(id).await?;
+        let response = self.socket.get_response(id).await?.get("data").unwrap().clone();
 
         match response.get("error") {
             None => Ok(serde_json::from_value::<JsonGroupV2InfoV1>(response).unwrap()),
@@ -49,7 +49,7 @@ where T: AsyncSocket,
         msg.push(b'\n');
 
         self.socket.write(&msg, &id).await?;
-        let response = self.socket.get_response(id).await?;
+        let response = self.socket.get_response(id).await?.get("data").unwrap().clone();
 
         match response.get("error") {
             None => Ok(()),
@@ -74,10 +74,34 @@ where T: AsyncSocket,
         msg.push(b'\n');
 
         self.socket.write(&msg, &id).await?;
-        let response = self.socket.get_response(id).await?;
+        let response = self.socket.get_response(id).await?.get("data").unwrap().clone();
 
         match response.get("error") {
             None => Ok(serde_json::from_value::<String>(response).unwrap()),
+            Some(_) => Err(SocketError::Signald(serde_json::from_value::<SignaldError>(response).unwrap()))
+        }
+    }
+
+    pub async fn answer_call(&mut self, msg: AnswerCallRequestV1, id: Option<Uuid>) -> Result<(), SocketError> {
+        let id = match id {
+            Some(id) => id,
+            None => Uuid::new_v4()
+        };
+        let msg = MessageCommon::new(
+            id.to_simple().to_string(),
+            String::from("answer_call"),
+            "v1".to_owned(),
+            msg
+        );
+
+        let mut msg = serde_json::to_vec(&msg).unwrap();
+        msg.push(b'\n');
+
+        self.socket.write(&msg, &id).await?;
+        let response = self.socket.get_response(id).await?.get("data").unwrap().clone();
+
+        match response.get("error") {
+            None => Ok(()),
             Some(_) => Err(SocketError::Signald(serde_json::from_value::<SignaldError>(response).unwrap()))
         }
     }
@@ -99,7 +123,32 @@ where T: AsyncSocket,
         msg.push(b'\n');
 
         self.socket.write(&msg, &id).await?;
-        let response = self.socket.get_response(id).await?;
+        let response = self.socket.get_response(id).await?.get("data").unwrap().clone();
+
+        match response.get("error") {
+            None => Ok(serde_json::from_value::<JsonGroupV2InfoV1>(response).unwrap()),
+            Some(_) => Err(SocketError::Signald(serde_json::from_value::<SignaldError>(response).unwrap()))
+        }
+    }
+
+    /// Bans users from a group. This works even if the users aren't in the group. If they are currently in the group, they will also be removed.
+    pub async fn ban_user(&mut self, msg: BanUserRequestV1, id: Option<Uuid>) -> Result<JsonGroupV2InfoV1, SocketError> {
+        let id = match id {
+            Some(id) => id,
+            None => Uuid::new_v4()
+        };
+        let msg = MessageCommon::new(
+            id.to_simple().to_string(),
+            String::from("ban_user"),
+            "v1".to_owned(),
+            msg
+        );
+
+        let mut msg = serde_json::to_vec(&msg).unwrap();
+        msg.push(b'\n');
+
+        self.socket.write(&msg, &id).await?;
+        let response = self.socket.get_response(id).await?.get("data").unwrap().clone();
 
         match response.get("error") {
             None => Ok(serde_json::from_value::<JsonGroupV2InfoV1>(response).unwrap()),
@@ -123,7 +172,7 @@ where T: AsyncSocket,
         msg.push(b'\n');
 
         self.socket.write(&msg, &id).await?;
-        let response = self.socket.get_response(id).await?;
+        let response = self.socket.get_response(id).await?.get("data").unwrap().clone();
 
         match response.get("error") {
             None => Ok(serde_json::from_value::<JsonGroupV2InfoV1>(response).unwrap()),
@@ -148,7 +197,7 @@ where T: AsyncSocket,
         msg.push(b'\n');
 
         self.socket.write(&msg, &id).await?;
-        let response = self.socket.get_response(id).await?;
+        let response = self.socket.get_response(id).await?.get("data").unwrap().clone();
 
         match response.get("error") {
             None => Ok(()),
@@ -172,7 +221,7 @@ where T: AsyncSocket,
         msg.push(b'\n');
 
         self.socket.write(&msg, &id).await?;
-        let response = self.socket.get_response(id).await?;
+        let response = self.socket.get_response(id).await?.get("data").unwrap().clone();
 
         match response.get("error") {
             None => Ok(()),
@@ -180,7 +229,7 @@ where T: AsyncSocket,
         }
     }
 
-    /// After a linking URI has been requested, finish_link must be called with the session_id provided with the URI. it will return information about the new account once the linking process is completed by the other device.
+    /// After a linking URI has been requested, finish_link must be called with the session_id provided with the URI. it will return information about the new account once the linking process is completed by the other device and the new account is setup. Note that the account setup process can sometimes take some time, if rapid userfeedback is required after scanning, use wait_for_scan first, then finish setup with finish_link.
     pub async fn finish_link(&mut self, msg: FinishLinkRequestV1, id: Option<Uuid>) -> Result<AccountV1, SocketError> {
         let id = match id {
             Some(id) => id,
@@ -197,7 +246,7 @@ where T: AsyncSocket,
         msg.push(b'\n');
 
         self.socket.write(&msg, &id).await?;
-        let response = self.socket.get_response(id).await?;
+        let response = self.socket.get_response(id).await?.get("data").unwrap().clone();
 
         match response.get("error") {
             None => Ok(serde_json::from_value::<AccountV1>(response).unwrap()),
@@ -222,7 +271,7 @@ where T: AsyncSocket,
         msg.push(b'\n');
 
         self.socket.write(&msg, &id).await?;
-        let response = self.socket.get_response(id).await?;
+        let response = self.socket.get_response(id).await?.get("data").unwrap().clone();
 
         match response.get("error") {
             None => Ok(serde_json::from_value::<LinkingURIV1>(response).unwrap()),
@@ -247,7 +296,7 @@ where T: AsyncSocket,
         msg.push(b'\n');
 
         self.socket.write(&msg, &id).await?;
-        let response = self.socket.get_response(id).await?;
+        let response = self.socket.get_response(id).await?.get("data").unwrap().clone();
 
         match response.get("error") {
             None => Ok(serde_json::from_value::<AllIdentityKeyListV1>(response).unwrap()),
@@ -255,7 +304,7 @@ where T: AsyncSocket,
         }
     }
 
-    /// Query the server for the latest state of a known group. If no account in signald is a member of the group (anymore), an error with error_type: 'UnknownGroupError' is returned.
+    /// Query the server for the latest state of a known group. If the account is not a member of the group, an UnknownGroupError is returned.
     pub async fn get_group(&mut self, msg: GetGroupRequestV1, id: Option<Uuid>) -> Result<JsonGroupV2InfoV1, SocketError> {
         let id = match id {
             Some(id) => id,
@@ -272,10 +321,35 @@ where T: AsyncSocket,
         msg.push(b'\n');
 
         self.socket.write(&msg, &id).await?;
-        let response = self.socket.get_response(id).await?;
+        let response = self.socket.get_response(id).await?.get("data").unwrap().clone();
 
         match response.get("error") {
             None => Ok(serde_json::from_value::<JsonGroupV2InfoV1>(response).unwrap()),
+            Some(_) => Err(SocketError::Signald(serde_json::from_value::<SignaldError>(response).unwrap()))
+        }
+    }
+
+    /// Query the server for group revision history. The history contains information about the changes between each revision and the user that made the change.
+    pub async fn get_group_revision_pages(&mut self, msg: GetGroupRevisionPagesRequestV1, id: Option<Uuid>) -> Result<GroupHistoryPageV1, SocketError> {
+        let id = match id {
+            Some(id) => id,
+            None => Uuid::new_v4()
+        };
+        let msg = MessageCommon::new(
+            id.to_simple().to_string(),
+            String::from("get_group_revision_pages"),
+            "v1".to_owned(),
+            msg
+        );
+
+        let mut msg = serde_json::to_vec(&msg).unwrap();
+        msg.push(b'\n');
+
+        self.socket.write(&msg, &id).await?;
+        let response = self.socket.get_response(id).await?.get("data").unwrap().clone();
+
+        match response.get("error") {
+            None => Ok(serde_json::from_value::<GroupHistoryPageV1>(response).unwrap()),
             Some(_) => Err(SocketError::Signald(serde_json::from_value::<SignaldError>(response).unwrap()))
         }
     }
@@ -297,7 +371,7 @@ where T: AsyncSocket,
         msg.push(b'\n');
 
         self.socket.write(&msg, &id).await?;
-        let response = self.socket.get_response(id).await?;
+        let response = self.socket.get_response(id).await?.get("data").unwrap().clone();
 
         match response.get("error") {
             None => Ok(serde_json::from_value::<IdentityKeyListV1>(response).unwrap()),
@@ -322,7 +396,7 @@ where T: AsyncSocket,
         msg.push(b'\n');
 
         self.socket.write(&msg, &id).await?;
-        let response = self.socket.get_response(id).await?;
+        let response = self.socket.get_response(id).await?.get("data").unwrap().clone();
 
         match response.get("error") {
             None => Ok(serde_json::from_value::<LinkedDevicesV1>(response).unwrap()),
@@ -347,7 +421,7 @@ where T: AsyncSocket,
         msg.push(b'\n');
 
         self.socket.write(&msg, &id).await?;
-        let response = self.socket.get_response(id).await?;
+        let response = self.socket.get_response(id).await?.get("data").unwrap().clone();
 
         match response.get("error") {
             None => Ok(serde_json::from_value::<ProfileV1>(response).unwrap()),
@@ -372,7 +446,7 @@ where T: AsyncSocket,
         msg.push(b'\n');
 
         self.socket.write(&msg, &id).await?;
-        let response = self.socket.get_response(id).await?;
+        let response = self.socket.get_response(id).await?.get("data").unwrap().clone();
 
         match response.get("error") {
             None => Ok(serde_json::from_value::<RemoteConfigListV1>(response).unwrap()),
@@ -396,7 +470,7 @@ where T: AsyncSocket,
         msg.push(b'\n');
 
         self.socket.write(&msg, &id).await?;
-        let response = self.socket.get_response(id).await?;
+        let response = self.socket.get_response(id).await?.get("data").unwrap().clone();
 
         match response.get("error") {
             None => Ok(serde_json::from_value::<ServerListV1>(response).unwrap()),
@@ -421,10 +495,59 @@ where T: AsyncSocket,
         msg.push(b'\n');
 
         self.socket.write(&msg, &id).await?;
-        let response = self.socket.get_response(id).await?;
+        let response = self.socket.get_response(id).await?.get("data").unwrap().clone();
 
         match response.get("error") {
             None => Ok(serde_json::from_value::<JsonGroupJoinInfoV1>(response).unwrap()),
+            Some(_) => Err(SocketError::Signald(serde_json::from_value::<SignaldError>(response).unwrap()))
+        }
+    }
+
+    pub async fn hangup_call(&mut self, msg: HangupCallRequestV1, id: Option<Uuid>) -> Result<(), SocketError> {
+        let id = match id {
+            Some(id) => id,
+            None => Uuid::new_v4()
+        };
+        let msg = MessageCommon::new(
+            id.to_simple().to_string(),
+            String::from("hangup_call"),
+            "v1".to_owned(),
+            msg
+        );
+
+        let mut msg = serde_json::to_vec(&msg).unwrap();
+        msg.push(b'\n');
+
+        self.socket.write(&msg, &id).await?;
+        let response = self.socket.get_response(id).await?.get("data").unwrap().clone();
+
+        match response.get("error") {
+            None => Ok(()),
+            Some(_) => Err(SocketError::Signald(serde_json::from_value::<SignaldError>(response).unwrap()))
+        }
+    }
+
+    /// Determine whether an account identifier is registered on the Signal service.
+    pub async fn is_identifier_registered(&mut self, msg: IsIdentifierRegisteredRequestV1, id: Option<Uuid>) -> Result<BooleanMessageV1, SocketError> {
+        let id = match id {
+            Some(id) => id,
+            None => Uuid::new_v4()
+        };
+        let msg = MessageCommon::new(
+            id.to_simple().to_string(),
+            String::from("is_identifier_registered"),
+            "v1".to_owned(),
+            msg
+        );
+
+        let mut msg = serde_json::to_vec(&msg).unwrap();
+        msg.push(b'\n');
+
+        self.socket.write(&msg, &id).await?;
+        let response = self.socket.get_response(id).await?.get("data").unwrap().clone();
+
+        match response.get("error") {
+            None => Ok(serde_json::from_value::<BooleanMessageV1>(response).unwrap()),
             Some(_) => Err(SocketError::Signald(serde_json::from_value::<SignaldError>(response).unwrap()))
         }
     }
@@ -446,7 +569,7 @@ where T: AsyncSocket,
         msg.push(b'\n');
 
         self.socket.write(&msg, &id).await?;
-        let response = self.socket.get_response(id).await?;
+        let response = self.socket.get_response(id).await?.get("data").unwrap().clone();
 
         match response.get("error") {
             None => Ok(serde_json::from_value::<JsonGroupJoinInfoV1>(response).unwrap()),
@@ -470,7 +593,7 @@ where T: AsyncSocket,
         msg.push(b'\n');
 
         self.socket.write(&msg, &id).await?;
-        let response = self.socket.get_response(id).await?;
+        let response = self.socket.get_response(id).await?.get("data").unwrap().clone();
 
         match response.get("error") {
             None => Ok(serde_json::from_value::<GroupInfoV1>(response).unwrap()),
@@ -495,7 +618,7 @@ where T: AsyncSocket,
         msg.push(b'\n');
 
         self.socket.write(&msg, &id).await?;
-        let response = self.socket.get_response(id).await?;
+        let response = self.socket.get_response(id).await?.get("data").unwrap().clone();
 
         match response.get("error") {
             None => Ok(serde_json::from_value::<AccountListV1>(response).unwrap()),
@@ -519,7 +642,7 @@ where T: AsyncSocket,
         msg.push(b'\n');
 
         self.socket.write(&msg, &id).await?;
-        let response = self.socket.get_response(id).await?;
+        let response = self.socket.get_response(id).await?.get("data").unwrap().clone();
 
         match response.get("error") {
             None => Ok(serde_json::from_value::<ProfileListV1>(response).unwrap()),
@@ -543,7 +666,7 @@ where T: AsyncSocket,
         msg.push(b'\n');
 
         self.socket.write(&msg, &id).await?;
-        let response = self.socket.get_response(id).await?;
+        let response = self.socket.get_response(id).await?.get("data").unwrap().clone();
 
         match response.get("error") {
             None => Ok(serde_json::from_value::<GroupListV1>(response).unwrap()),
@@ -567,7 +690,7 @@ where T: AsyncSocket,
         msg.push(b'\n');
 
         self.socket.write(&msg, &id).await?;
-        let response = self.socket.get_response(id).await?;
+        let response = self.socket.get_response(id).await?.get("data").unwrap().clone();
 
         match response.get("error") {
             None => Ok(()),
@@ -592,7 +715,7 @@ where T: AsyncSocket,
         msg.push(b'\n');
 
         self.socket.write(&msg, &id).await?;
-        let response = self.socket.get_response(id).await?;
+        let response = self.socket.get_response(id).await?.get("data").unwrap().clone();
 
         match response.get("error") {
             None => Ok(serde_json::from_value::<SendResponseV1>(response).unwrap()),
@@ -617,7 +740,7 @@ where T: AsyncSocket,
         msg.push(b'\n');
 
         self.socket.write(&msg, &id).await?;
-        let response = self.socket.get_response(id).await?;
+        let response = self.socket.get_response(id).await?.get("data").unwrap().clone();
 
         match response.get("error") {
             None => Ok(serde_json::from_value::<JsonGroupV2InfoV1>(response).unwrap()),
@@ -642,7 +765,7 @@ where T: AsyncSocket,
         msg.push(b'\n');
 
         self.socket.write(&msg, &id).await?;
-        let response = self.socket.get_response(id).await?;
+        let response = self.socket.get_response(id).await?.get("data").unwrap().clone();
 
         match response.get("error") {
             None => Ok(serde_json::from_value::<AccountV1>(response).unwrap()),
@@ -667,7 +790,7 @@ where T: AsyncSocket,
         msg.push(b'\n');
 
         self.socket.write(&msg, &id).await?;
-        let response = self.socket.get_response(id).await?;
+        let response = self.socket.get_response(id).await?.get("data").unwrap().clone();
 
         match response.get("error") {
             None => Ok(serde_json::from_value::<SendResponseV1>(response).unwrap()),
@@ -692,7 +815,7 @@ where T: AsyncSocket,
         msg.push(b'\n');
 
         self.socket.write(&msg, &id).await?;
-        let response = self.socket.get_response(id).await?;
+        let response = self.socket.get_response(id).await?.get("data").unwrap().clone();
 
         match response.get("error") {
             None => Ok(()),
@@ -717,7 +840,7 @@ where T: AsyncSocket,
         msg.push(b'\n');
 
         self.socket.write(&msg, &id).await?;
-        let response = self.socket.get_response(id).await?;
+        let response = self.socket.get_response(id).await?.get("data").unwrap().clone();
 
         match response.get("error") {
             None => Ok(()),
@@ -742,7 +865,7 @@ where T: AsyncSocket,
         msg.push(b'\n');
 
         self.socket.write(&msg, &id).await?;
-        let response = self.socket.get_response(id).await?;
+        let response = self.socket.get_response(id).await?.get("data").unwrap().clone();
 
         match response.get("error") {
             None => Ok(serde_json::from_value::<SendResponseV1>(response).unwrap()),
@@ -767,7 +890,7 @@ where T: AsyncSocket,
         msg.push(b'\n');
 
         self.socket.write(&msg, &id).await?;
-        let response = self.socket.get_response(id).await?;
+        let response = self.socket.get_response(id).await?.get("data").unwrap().clone();
 
         match response.get("error") {
             None => Ok(serde_json::from_value::<JsonAddressV1>(response).unwrap()),
@@ -791,10 +914,58 @@ where T: AsyncSocket,
         msg.push(b'\n');
 
         self.socket.write(&msg, &id).await?;
-        let response = self.socket.get_response(id).await?;
+        let response = self.socket.get_response(id).await?.get("data").unwrap().clone();
 
         match response.get("error") {
             None => Ok(serde_json::from_value::<SendResponseV1>(response).unwrap()),
+            Some(_) => Err(SocketError::Signald(serde_json::from_value::<SignaldError>(response).unwrap()))
+        }
+    }
+
+    pub async fn send_call_offer(&mut self, msg: SendCallOfferRequestV1, id: Option<Uuid>) -> Result<(), SocketError> {
+        let id = match id {
+            Some(id) => id,
+            None => Uuid::new_v4()
+        };
+        let msg = MessageCommon::new(
+            id.to_simple().to_string(),
+            String::from("send_call_offer"),
+            "v1".to_owned(),
+            msg
+        );
+
+        let mut msg = serde_json::to_vec(&msg).unwrap();
+        msg.push(b'\n');
+
+        self.socket.write(&msg, &id).await?;
+        let response = self.socket.get_response(id).await?.get("data").unwrap().clone();
+
+        match response.get("error") {
+            None => Ok(()),
+            Some(_) => Err(SocketError::Signald(serde_json::from_value::<SignaldError>(response).unwrap()))
+        }
+    }
+
+    pub async fn send_ice_updates(&mut self, msg: SendIceUpdatesRequestV1, id: Option<Uuid>) -> Result<(), SocketError> {
+        let id = match id {
+            Some(id) => id,
+            None => Uuid::new_v4()
+        };
+        let msg = MessageCommon::new(
+            id.to_simple().to_string(),
+            String::from("send_ice_updates"),
+            "v1".to_owned(),
+            msg
+        );
+
+        let mut msg = serde_json::to_vec(&msg).unwrap();
+        msg.push(b'\n');
+
+        self.socket.write(&msg, &id).await?;
+        let response = self.socket.get_response(id).await?.get("data").unwrap().clone();
+
+        match response.get("error") {
+            None => Ok(()),
             Some(_) => Err(SocketError::Signald(serde_json::from_value::<SignaldError>(response).unwrap()))
         }
     }
@@ -816,7 +987,7 @@ where T: AsyncSocket,
         msg.push(b'\n');
 
         self.socket.write(&msg, &id).await?;
-        let response = self.socket.get_response(id).await?;
+        let response = self.socket.get_response(id).await?.get("data").unwrap().clone();
 
         match response.get("error") {
             None => Ok(serde_json::from_value::<SendResponseV1>(response).unwrap()),
@@ -824,7 +995,32 @@ where T: AsyncSocket,
         }
     }
 
-    /// set this device's name. This will show up on the mobile device on the same account under 
+    /// Sends a sync message to the account's devices
+    pub async fn send_sync_message(&mut self, msg: SendSyncMessageRequestV1, id: Option<Uuid>) -> Result<JsonSendMessageResultV1, SocketError> {
+        let id = match id {
+            Some(id) => id,
+            None => Uuid::new_v4()
+        };
+        let msg = MessageCommon::new(
+            id.to_simple().to_string(),
+            String::from("send_sync_message"),
+            "v1".to_owned(),
+            msg
+        );
+
+        let mut msg = serde_json::to_vec(&msg).unwrap();
+        msg.push(b'\n');
+
+        self.socket.write(&msg, &id).await?;
+        let response = self.socket.get_response(id).await?.get("data").unwrap().clone();
+
+        match response.get("error") {
+            None => Ok(serde_json::from_value::<JsonSendMessageResultV1>(response).unwrap()),
+            Some(_) => Err(SocketError::Signald(serde_json::from_value::<SignaldError>(response).unwrap()))
+        }
+    }
+
+    /// set this device's name. This will show up on the mobile device on the same account under settings -> linked devices
     pub async fn set_device_name(&mut self, msg: SetDeviceNameRequestV1, id: Option<Uuid>) -> Result<(), SocketError> {
         let id = match id {
             Some(id) => id,
@@ -841,7 +1037,7 @@ where T: AsyncSocket,
         msg.push(b'\n');
 
         self.socket.write(&msg, &id).await?;
-        let response = self.socket.get_response(id).await?;
+        let response = self.socket.get_response(id).await?.get("data").unwrap().clone();
 
         match response.get("error") {
             None => Ok(()),
@@ -866,7 +1062,7 @@ where T: AsyncSocket,
         msg.push(b'\n');
 
         self.socket.write(&msg, &id).await?;
-        let response = self.socket.get_response(id).await?;
+        let response = self.socket.get_response(id).await?.get("data").unwrap().clone();
 
         match response.get("error") {
             None => Ok(serde_json::from_value::<SendResponseV1>(response).unwrap()),
@@ -890,7 +1086,31 @@ where T: AsyncSocket,
         msg.push(b'\n');
 
         self.socket.write(&msg, &id).await?;
-        let response = self.socket.get_response(id).await?;
+        let response = self.socket.get_response(id).await?.get("data").unwrap().clone();
+
+        match response.get("error") {
+            None => Ok(()),
+            Some(_) => Err(SocketError::Signald(serde_json::from_value::<SignaldError>(response).unwrap()))
+        }
+    }
+
+    pub async fn submit_challenge(&mut self, msg: SubmitChallengeRequestV1, id: Option<Uuid>) -> Result<(), SocketError> {
+        let id = match id {
+            Some(id) => id,
+            None => Uuid::new_v4()
+        };
+        let msg = MessageCommon::new(
+            id.to_simple().to_string(),
+            String::from("submit_challenge"),
+            "v1".to_owned(),
+            msg
+        );
+
+        let mut msg = serde_json::to_vec(&msg).unwrap();
+        msg.push(b'\n');
+
+        self.socket.write(&msg, &id).await?;
+        let response = self.socket.get_response(id).await?.get("data").unwrap().clone();
 
         match response.get("error") {
             None => Ok(()),
@@ -915,7 +1135,7 @@ where T: AsyncSocket,
         msg.push(b'\n');
 
         self.socket.write(&msg, &id).await?;
-        let response = self.socket.get_response(id).await?;
+        let response = self.socket.get_response(id).await?.get("data").unwrap().clone();
 
         match response.get("error") {
             None => Ok(()),
@@ -940,7 +1160,7 @@ where T: AsyncSocket,
         msg.push(b'\n');
 
         self.socket.write(&msg, &id).await?;
-        let response = self.socket.get_response(id).await?;
+        let response = self.socket.get_response(id).await?.get("data").unwrap().clone();
 
         match response.get("error") {
             None => Ok(()),
@@ -965,10 +1185,35 @@ where T: AsyncSocket,
         msg.push(b'\n');
 
         self.socket.write(&msg, &id).await?;
-        let response = self.socket.get_response(id).await?;
+        let response = self.socket.get_response(id).await?.get("data").unwrap().clone();
 
         match response.get("error") {
             None => Ok(()),
+            Some(_) => Err(SocketError::Signald(serde_json::from_value::<SignaldError>(response).unwrap()))
+        }
+    }
+
+    /// Unbans users from a group.
+    pub async fn unban_user(&mut self, msg: UnbanUserRequestV1, id: Option<Uuid>) -> Result<JsonGroupV2InfoV1, SocketError> {
+        let id = match id {
+            Some(id) => id,
+            None => Uuid::new_v4()
+        };
+        let msg = MessageCommon::new(
+            id.to_simple().to_string(),
+            String::from("unban_user"),
+            "v1".to_owned(),
+            msg
+        );
+
+        let mut msg = serde_json::to_vec(&msg).unwrap();
+        msg.push(b'\n');
+
+        self.socket.write(&msg, &id).await?;
+        let response = self.socket.get_response(id).await?.get("data").unwrap().clone();
+
+        match response.get("error") {
+            None => Ok(serde_json::from_value::<JsonGroupV2InfoV1>(response).unwrap()),
             Some(_) => Err(SocketError::Signald(serde_json::from_value::<SignaldError>(response).unwrap()))
         }
     }
@@ -990,7 +1235,7 @@ where T: AsyncSocket,
         msg.push(b'\n');
 
         self.socket.write(&msg, &id).await?;
-        let response = self.socket.get_response(id).await?;
+        let response = self.socket.get_response(id).await?.get("data").unwrap().clone();
 
         match response.get("error") {
             None => Ok(()),
@@ -1015,7 +1260,7 @@ where T: AsyncSocket,
         msg.push(b'\n');
 
         self.socket.write(&msg, &id).await?;
-        let response = self.socket.get_response(id).await?;
+        let response = self.socket.get_response(id).await?.get("data").unwrap().clone();
 
         match response.get("error") {
             None => Ok(serde_json::from_value::<ProfileV1>(response).unwrap()),
@@ -1040,7 +1285,7 @@ where T: AsyncSocket,
         msg.push(b'\n');
 
         self.socket.write(&msg, &id).await?;
-        let response = self.socket.get_response(id).await?;
+        let response = self.socket.get_response(id).await?.get("data").unwrap().clone();
 
         match response.get("error") {
             None => Ok(serde_json::from_value::<GroupInfoV1>(response).unwrap()),
@@ -1065,7 +1310,7 @@ where T: AsyncSocket,
         msg.push(b'\n');
 
         self.socket.write(&msg, &id).await?;
-        let response = self.socket.get_response(id).await?;
+        let response = self.socket.get_response(id).await?.get("data").unwrap().clone();
 
         match response.get("error") {
             None => Ok(serde_json::from_value::<AccountV1>(response).unwrap()),
@@ -1089,10 +1334,35 @@ where T: AsyncSocket,
         msg.push(b'\n');
 
         self.socket.write(&msg, &id).await?;
-        let response = self.socket.get_response(id).await?;
+        let response = self.socket.get_response(id).await?.get("data").unwrap().clone();
 
         match response.get("error") {
             None => Ok(serde_json::from_value::<JsonVersionMessageV1>(response).unwrap()),
+            Some(_) => Err(SocketError::Signald(serde_json::from_value::<SignaldError>(response).unwrap()))
+        }
+    }
+
+    /// An optional part of the linking process. Intended to be called after displaying the QR code, will return quickly after the user scans the QR code. finish_link must be called after wait_for_scan returns a non-error
+    pub async fn wait_for_scan(&mut self, msg: WaitForScanRequestV1, id: Option<Uuid>) -> Result<(), SocketError> {
+        let id = match id {
+            Some(id) => id,
+            None => Uuid::new_v4()
+        };
+        let msg = MessageCommon::new(
+            id.to_simple().to_string(),
+            String::from("wait_for_scan"),
+            "v1".to_owned(),
+            msg
+        );
+
+        let mut msg = serde_json::to_vec(&msg).unwrap();
+        msg.push(b'\n');
+
+        self.socket.write(&msg, &id).await?;
+        let response = self.socket.get_response(id).await?.get("data").unwrap().clone();
+
+        match response.get("error") {
+            None => Ok(()),
             Some(_) => Err(SocketError::Signald(serde_json::from_value::<SignaldError>(response).unwrap()))
         }
     }
@@ -1124,9 +1394,25 @@ where T: AsyncSocket,
                     Err(SocketError::General("Incorrect message type"))
                 }
             },
+            "answer_call" => {
+                if let SignaldTypes::AnswerCallRequestV1(msg) = msg {
+                    self.answer_call(msg, Some(id)).await
+                        .map(|_| SignaldTypes::NoResponse)
+                } else {
+                    Err(SocketError::General("Incorrect message type"))
+                }
+            },
             "approve_membership" => {
                 if let SignaldTypes::ApproveMembershipRequestV1(msg) = msg {
                     self.approve_membership(msg, Some(id)).await
+                        .map(|response| SignaldTypes::JsonGroupV2InfoV1(response))
+                } else {
+                    Err(SocketError::General("Incorrect message type"))
+                }
+            },
+            "ban_user" => {
+                if let SignaldTypes::BanUserRequestV1(msg) = msg {
+                    self.ban_user(msg, Some(id)).await
                         .map(|response| SignaldTypes::JsonGroupV2InfoV1(response))
                 } else {
                     Err(SocketError::General("Incorrect message type"))
@@ -1188,6 +1474,14 @@ where T: AsyncSocket,
                     Err(SocketError::General("Incorrect message type"))
                 }
             },
+            "get_group_revision_pages" => {
+                if let SignaldTypes::GetGroupRevisionPagesRequestV1(msg) = msg {
+                    self.get_group_revision_pages(msg, Some(id)).await
+                        .map(|response| SignaldTypes::GroupHistoryPageV1(response))
+                } else {
+                    Err(SocketError::General("Incorrect message type"))
+                }
+            },
             "get_identities" => {
                 if let SignaldTypes::GetIdentitiesRequestV1(msg) = msg {
                     self.get_identities(msg, Some(id)).await
@@ -1232,6 +1526,22 @@ where T: AsyncSocket,
                 if let SignaldTypes::GroupLinkInfoRequestV1(msg) = msg {
                     self.group_link_info(msg, Some(id)).await
                         .map(|response| SignaldTypes::JsonGroupJoinInfoV1(response))
+                } else {
+                    Err(SocketError::General("Incorrect message type"))
+                }
+            },
+            "hangup_call" => {
+                if let SignaldTypes::HangupCallRequestV1(msg) = msg {
+                    self.hangup_call(msg, Some(id)).await
+                        .map(|_| SignaldTypes::NoResponse)
+                } else {
+                    Err(SocketError::General("Incorrect message type"))
+                }
+            },
+            "is_identifier_registered" => {
+                if let SignaldTypes::IsIdentifierRegisteredRequestV1(msg) = msg {
+                    self.is_identifier_registered(msg, Some(id)).await
+                        .map(|response| SignaldTypes::BooleanMessageV1(response))
                 } else {
                     Err(SocketError::General("Incorrect message type"))
                 }
@@ -1356,10 +1666,34 @@ where T: AsyncSocket,
                     Err(SocketError::General("Incorrect message type"))
                 }
             },
+            "send_call_offer" => {
+                if let SignaldTypes::SendCallOfferRequestV1(msg) = msg {
+                    self.send_call_offer(msg, Some(id)).await
+                        .map(|_| SignaldTypes::NoResponse)
+                } else {
+                    Err(SocketError::General("Incorrect message type"))
+                }
+            },
+            "send_ice_updates" => {
+                if let SignaldTypes::SendIceUpdatesRequestV1(msg) = msg {
+                    self.send_ice_updates(msg, Some(id)).await
+                        .map(|_| SignaldTypes::NoResponse)
+                } else {
+                    Err(SocketError::General("Incorrect message type"))
+                }
+            },
             "send_payment" => {
                 if let SignaldTypes::SendPaymentRequestV1(msg) = msg {
                     self.send_payment(msg, Some(id)).await
                         .map(|response| SignaldTypes::SendResponseV1(response))
+                } else {
+                    Err(SocketError::General("Incorrect message type"))
+                }
+            },
+            "send_sync_message" => {
+                if let SignaldTypes::SendSyncMessageRequestV1(msg) = msg {
+                    self.send_sync_message(msg, Some(id)).await
+                        .map(|response| SignaldTypes::JsonSendMessageResultV1(response))
                 } else {
                     Err(SocketError::General("Incorrect message type"))
                 }
@@ -1388,6 +1722,14 @@ where T: AsyncSocket,
                     Err(SocketError::General("Incorrect message type"))
                 }
             },
+            "submit_challenge" => {
+                if let SignaldTypes::SubmitChallengeRequestV1(msg) = msg {
+                    self.submit_challenge(msg, Some(id)).await
+                        .map(|_| SignaldTypes::NoResponse)
+                } else {
+                    Err(SocketError::General("Incorrect message type"))
+                }
+            },
             "subscribe" => {
                 if let SignaldTypes::SubscribeRequestV1(msg) = msg {
                     self.subscribe(msg, Some(id)).await
@@ -1408,6 +1750,14 @@ where T: AsyncSocket,
                 if let SignaldTypes::TypingRequestV1(msg) = msg {
                     self.typing(msg, Some(id)).await
                         .map(|_| SignaldTypes::NoResponse)
+                } else {
+                    Err(SocketError::General("Incorrect message type"))
+                }
+            },
+            "unban_user" => {
+                if let SignaldTypes::UnbanUserRequestV1(msg) = msg {
+                    self.unban_user(msg, Some(id)).await
+                        .map(|response| SignaldTypes::JsonGroupV2InfoV1(response))
                 } else {
                     Err(SocketError::General("Incorrect message type"))
                 }
@@ -1448,6 +1798,14 @@ where T: AsyncSocket,
                 if let SignaldTypes::VersionRequestV1(msg) = msg {
                     self.version(msg, Some(id)).await
                         .map(|response| SignaldTypes::JsonVersionMessageV1(response))
+                } else {
+                    Err(SocketError::General("Incorrect message type"))
+                }
+            },
+            "wait_for_scan" => {
+                if let SignaldTypes::WaitForScanRequestV1(msg) = msg {
+                    self.wait_for_scan(msg, Some(id)).await
+                        .map(|_| SignaldTypes::NoResponse)
                 } else {
                     Err(SocketError::General("Incorrect message type"))
                 }

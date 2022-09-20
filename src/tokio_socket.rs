@@ -104,11 +104,15 @@ async fn listen(socket: OwnedReadHalf, map: Map, listening: Arc<Mutex<bool>>) {
         match reader.read_line(&mut buf).await {
             Ok(_) => {
                 let response: Value = serde_json::from_str(buf.as_str()).unwrap();
+
+                println!("got response: {:?}", response);
                 if let Some(id) = response.get("id") {
                     let id = Uuid::parse_str(id.as_str().unwrap()).unwrap();
                     let sender = map.lock().unwrap().get(&id).unwrap().0.clone();
                     match sender.send(response).await {
-                        Ok(_) => {},
+                        Ok(_) => {
+                            println!("sent response!");
+                        },
                         Err(e) => println!("Error sending response: {}", e)
                     }
                 }
